@@ -1,3 +1,7 @@
+# Invoke with
+# START http://boxstarter.org/package/nr/url?https://github.com/neutmute/nm-boxstarter/blob/master/base-box.ps1 
+#
+
 $Boxstarter.RebootOk=$true
 $Boxstarter.NoPassword=$false
 $Boxstarter.AutoLogin=$true
