@@ -1,5 +1,5 @@
 # Invoke with
-# START http://boxstarter.org/package/nr/url?https://github.com/neutmute/nm-boxstarter/blob/master/base-box.ps1 
+# START http://boxstarter.org/package/nr/url?https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1
 #
 
 $Boxstarter.RebootOk=$true
@@ -10,7 +10,7 @@ Enable-RemoteDesktop
 Update-ExecutionPolicy -Policy Unrestricted
 #Install-WindowsUpdate -AcceptEula
 
-Set-Volume -DriveLetter $systemDrive -NewFileSystemLabel "System"
+Set-Volume -DriveLetter $env:SystemDrive[0] -NewFileSystemLabel "System"
 
 Write-BoxstarterMessage "Starting chocolatey installs"
 
