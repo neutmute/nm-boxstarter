@@ -6,11 +6,14 @@ $Boxstarter.RebootOk=$true
 $Boxstarter.NoPassword=$false
 $Boxstarter.AutoLogin=$true
 
+Enable-MicrosoftUpdate
 Enable-RemoteDesktop
 Update-ExecutionPolicy -Policy Unrestricted
-#Install-WindowsUpdate -AcceptEula
 
 Set-Volume -DriveLetter $env:SystemDrive[0] -NewFileSystemLabel "System"
+
+Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -EnableShowProtectedOSFiles -EnableShowFileExtensions -EnableShowFullPathInTitleBar
+Set-TaskbarOptions -Combine Never
 
 Write-BoxstarterMessage "Starting chocolatey installs"
 
@@ -24,8 +27,12 @@ choco install irfanview                         --yes
 choco install irfanviewplugins                  --yes
 choco install 7zip.install                      --yes
 choco install k-litecodecpackfull               --yes
+choco install veracrypt 						--yes
 
 choco install commandwindowhere                 --yes
 choco install taskbar-never-combine             --yes
 choco install explorer-show-all-folders         --yes
 choco install explorer-expand-to-current-folder --yes
+
+#Install-WindowsUpdate -AcceptEula
+if (Test-PendingReboot) { Invoke-Reboot }
