@@ -1,6 +1,16 @@
-# Invoke with
-# START http://boxstarter.org/package/nr/url?https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1
-#
+<# 
+Invoke with
+
+OPTIONAL
+	[Environment]::SetEnvironmentVariable("BoxStarterIsDev", "1", "Machine")
+	
+	
+START
+	START http://boxstarter.org/package/nr/url?https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1
+
+
+#>
+#Import-Module Boxstarter.Chocolatey
 
 $Boxstarter.RebootOk=$true
 $Boxstarter.NoPassword=$false
@@ -47,6 +57,31 @@ function InstallWindowsUpdate()
 	if (Test-PendingReboot) { Invoke-Reboot }
 }
 
+function InstallChocoDevApps
+{
+	#choco install boxstarter              --yes --limitoutput
+	choco install nsis.install            --yes --limitoutput
+	choco install commandwindowhere       --yes --limitoutput
+	choco install filezilla               --yes --limitoutput
+	choco install putty                   --yes --limitoutput
+	choco install wireshark               --yes --limitoutput
+	choco install autohotkey.install      --yes --limitoutput
+	choco install winscp                  --yes --limitoutput
+	choco install windirstat              --yes --limitoutput
+	choco install console2                --yes --limitoutput
+	choco install virtualbox              --yes --limitoutput
+	choco install nmap                    --yes --limitoutput
+	choco install dotpeek                 --yes --limitoutput
+	choco install nugetpackageexplorer    --yes --limitoutput
+	#choco install pidgin                  --yes --limitoutput
+}
+
 InstallChocoCoreApps
 InstallChocoUserSettings
+
+if ($env:BoxStarterIsDev eq "1")
+{
+	InstallChocoDevApps
+}
+
 InstallWindowsUpdate
