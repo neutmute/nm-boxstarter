@@ -78,8 +78,9 @@ function InstallChocoDevApps
 InstallChocoCoreApps
 InstallChocoUserSettings
 
-if (Test-Path variable:global:BoxStarterInstallDev)
+if (Test-Path env:\BoxStarterInstallDev)
 {
+	Write-BoxstarterMessage "Installing dev apps"
 	InstallChocoDevApps
 }
 
