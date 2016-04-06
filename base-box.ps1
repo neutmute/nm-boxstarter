@@ -78,7 +78,7 @@ function InstallChocoDevApps
 InstallChocoCoreApps
 InstallChocoUserSettings
 
-if ($env:BoxStarterInstallDev eq "1")
+if (Test-Path variable:global:BoxStarterInstallDev)
 {
 	InstallChocoDevApps
 }
