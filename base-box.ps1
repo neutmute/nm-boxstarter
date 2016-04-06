@@ -1,16 +1,15 @@
 <# 
-Invoke with
 
-OPTIONAL
-	[Environment]::SetEnvironmentVariable("BoxStarterIsDev", "1", "Machine")
+#OPTIONAL
+	# If Dev Machine
+	[Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Machine") # for reboots
+	[Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Process") # for right now
 	
 	
-START
+#START
 	START http://boxstarter.org/package/nr/url?https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1
 
-
 #>
-#Import-Module Boxstarter.Chocolatey
 
 $Boxstarter.RebootOk=$true
 $Boxstarter.NoPassword=$false
@@ -79,7 +78,7 @@ function InstallChocoDevApps
 InstallChocoCoreApps
 InstallChocoUserSettings
 
-if ($env:BoxStarterIsDev eq "1")
+if ($env:BoxStarterInstallDev eq "1")
 {
 	InstallChocoDevApps
 }
