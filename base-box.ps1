@@ -91,8 +91,7 @@ function InstallChocoDevApps
 	#choco install pidgin                  --yes --limitoutput
 	
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
-	choco install git-credential-manager-for-windows				--yes --limitoutput
-	
+
 	choco install visualstudio2015enterprise
 	Install-ChocolateyVsixPackage 'PowerShell Tools for Visual Studio 2015' https://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597/file/199313/1/PowerShellTools.14.0.vsix
 	Install-ChocolateyVsixPackage 'Productivity Power Tools 2015' https://visualstudiogallery.msdn.microsoft.com/34ebc6a2-2777-421d-8914-e29c1dfa7f5d/file/169971/1/ProPowerTools.vsix
