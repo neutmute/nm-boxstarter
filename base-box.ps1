@@ -156,12 +156,12 @@ if ($hasDdrive)
 	$userDataPath = "D:\Data\Documents"
 	$mediaPath = "D:\Media"
 	
-    Move-Library -libraryName "My Pictures" -newPath (Join-Path $userDataPath "Pictures")
-    Move-Library -libraryName "Personal"    -newPath (Join-Path $userDataPath "Documents")
-    Move-Library -libraryName "Desktop"     -newPath (Join-Path $userDataPath "Desktop")
-    Move-Library -libraryName "My Video"    -newPath (Join-Path $mediaPath "Videos")
-    Move-Library -libraryName "My Music"    -newPath (Join-Path $mediaPath "Music")
-    Move-Library -libraryName "Downloads"   -newPath "D:\Downloads"
+    MoveLibrary -libraryName "My Pictures" -newPath (Join-Path $userDataPath "Pictures")
+    MoveLibrary -libraryName "Personal"    -newPath (Join-Path $userDataPath "Documents")
+    MoveLibrary -libraryName "Desktop"     -newPath (Join-Path $userDataPath "Desktop")
+    MoveLibrary -libraryName "My Video"    -newPath (Join-Path $mediaPath "Videos")
+    MoveLibrary -libraryName "My Music"    -newPath (Join-Path $mediaPath "Music")
+    MoveLibrary -libraryName "Downloads"   -newPath "D:\Downloads"
 }
 
 InstallWindowsUpdate
