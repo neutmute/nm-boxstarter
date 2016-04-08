@@ -5,6 +5,10 @@
 	[Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Machine") # for reboots
 	[Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Process") # for right now
 	
+	# If Home Machine
+	[Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Machine") # for reboots
+	[Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Process") # for right now
+	
 #START
 	START http://boxstarter.org/package/nr/url?https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1
 
@@ -43,19 +47,22 @@ function MoveLibrary {
 
 function InstallChocoCoreApps()
 {
-	Write-BoxstarterMessage "Starting chocolatey installs"
-	
 	choco install firefox                           --yes --limitoutput
 	choco install googlechrome                      --yes --limitoutput
 	choco install flashplayerplugin                 --yes --limitoutput
 	choco install notepadplusplus.install           --yes --limitoutput
 	choco install paint.net                         --yes --limitoutput
-	choco install itunes                            --yes --limitoutput
 	choco install irfanview                         --yes --limitoutput
 	choco install irfanviewplugins                  --yes --limitoutput
 	choco install 7zip.install                      --yes --limitoutput
-	choco install k-litecodecpackfull               --yes --limitoutput
+	choco install lastpass			                --yes --limitoutput
 	#choco install veracrypt 						--yes --limitoutput #not silent
+}
+
+function InstallChocoHomeApps()
+{
+	choco install k-litecodecpackfull               --yes --limitoutput	
+	choco install itunes                            --yes --limitoutput
 }
 
 function InstallChocoUserSettings()
@@ -74,20 +81,21 @@ function InstallWindowsUpdate()
 
 function InstallChocoDevApps
 {
+	choco install jdk7		              --yes --limitoutput  #neo4j
 	choco install nsis.install            --yes --limitoutput
 	choco install commandwindowhere       --yes --limitoutput
 	choco install filezilla               --yes --limitoutput
 	choco install putty                   --yes --limitoutput
-	choco install wireshark               --yes --limitoutput
-	choco install autohotkey.install      --yes --limitoutput
 	choco install winscp                  --yes --limitoutput
+	choco install wireshark               --yes --limitoutput
+	choco install nmap                    --yes --limitoutput
+	choco install autohotkey.install      --yes --limitoutput
 	choco install windirstat              --yes --limitoutput
 	choco install console2                --yes --limitoutput
 	choco install virtualbox              --yes --limitoutput
-	choco install nmap                    --yes --limitoutput
 	choco install dotpeek                 --yes --limitoutput
 	choco install nugetpackageexplorer    --yes --limitoutput
-	choco install sourcetree 			  --yes --limitoutput
+	choco install sourcetree 			  --yes --limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
 	#choco install pidgin                  --yes --limitoutput
 	
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
@@ -138,8 +146,11 @@ function InstallInternetInformationServices()
 }
 
 ConfigureBaseSettings
+
+Write-BoxstarterMessage "Starting chocolatey installs"
+
+InstallChocoUserSettings	
 InstallChocoCoreApps
-InstallChocoUserSettings
 
 if (Test-Path env:\BoxStarterInstallDev)
 {
@@ -147,9 +158,14 @@ if (Test-Path env:\BoxStarterInstallDev)
 	InstallChocoDevApps
 }
 
+if (Test-Path env:\BoxStarterInstallHome)
+{
+	InstallChocoHomeApps
+}
+
 if ($hasDdrive)
 {
-	Write-BoxstarterMessage "Configuring Libraries"
+	Write-BoxstarterMessage "Configuring D:\"
 	
 	Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
 	
@@ -164,4 +180,5 @@ if ($hasDdrive)
     MoveLibrary -libraryName "Downloads"   -newPath "D:\Downloads"
 }
 
+Write-BoxstarterMessage "Windows update..."
 InstallWindowsUpdate
