@@ -5,6 +5,16 @@
 	[Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Machine") # for reboots
 	[Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Process") # for right now
 	
+	[Environment]::SetEnvironmentVariable("choco:sqlserver2008:isoImage", "D:\Downloads\en_sql_server_2008_r2_developer_x86_x64_ia64_dvd_522665.iso", "Machine") # for reboots
+	[Environment]::SetEnvironmentVariable("choco:sqlserver2008:isoImage", "D:\Downloads\en_sql_server_2008_r2_developer_x86_x64_ia64_dvd_522665.iso", "Process") # for right now
+	
+	[Environment]::SetEnvironmentVariable("choco:sqlserver2012:isoImage", "D:\Downloads\en_sql_server_2012_developer_edition_with_service_pack_3_x86_dvd_7286785.iso", "Machine") # for reboots
+	[Environment]::SetEnvironmentVariable("choco:sqlserver2012:isoImage", "D:\Downloads\en_sql_server_2012_developer_edition_with_service_pack_3_x86_dvd_7286785.iso", "Process") # for right now
+	
+	[Environment]::SetEnvironmentVariable("choco:sqlserver2016:isoImage", "D:\Downloads\en_sql_server_2016_rc_2_x64_dvd_8509698.iso", "Machine") # for reboots
+	[Environment]::SetEnvironmentVariable("choco:sqlserver2016:isoImage", "D:\Downloads\en_sql_server_2016_rc_2_x64_dvd_8509698.iso", "Process") # for right now
+	
+	
 	# If Home Machine
 	[Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Machine") # for reboots
 	[Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Process") # for right now
@@ -77,6 +87,38 @@ function InstallWindowsUpdate()
 	Enable-MicrosoftUpdate
 	#Install-WindowsUpdate -AcceptEula
 	if (Test-PendingReboot) { Invoke-Reboot }
+}
+
+function InstallSqlServer()
+{	
+	if (Test-PendingReboot) { Invoke-Reboot }
+	
+	$env:choco:sqlserver2008:INSTANCEID="sql2008"
+	$env:choco:sqlserver2008:INSTANCENAME="sql2008"
+	$env:choco:sqlserver2008:AGTSVCACCOUNT="NT AUTHORITY\SYSTEM"
+	$env:choco:sqlserver2008:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+	$env:choco:sqlserver2008:SQLSVCACCOUNT="NT AUTHORITY\SYSTEM"
+	$env:choco:sqlserver2008:INSTALLSQLDATADIR="D:\Data\sql"
+	choco install sqlserver2008
+	
+	if (Test-PendingReboot) { Invoke-Reboot }
+	$env:choco:sqlserver2012:INSTALLSQLDATADIR="D:\Data\Sql"
+	$env:choco:sqlserver2012:INSTANCEID="sql2012"
+	$env:choco:sqlserver2012:INSTANCENAME="sql2012"
+	$env:choco:sqlserver2012:FEATURES="SQLENGINE,SSMS,ADV_SSMS"
+	$env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2012"
+	$env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2012"
+	$env:choco:sqlserver2012:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+	choco install sqlserver2012
+	
+	if (Test-PendingReboot) { Invoke-Reboot }
+	$env:choco:sqlserver2016:INSTALLSQLDATADIR="D:\Data\Sql"
+	$env:choco:sqlserver2016:INSTANCEID="sql2016"
+	$env:choco:sqlserver2016:INSTANCENAME="sql2016"
+	$env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2016"
+	$env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2016"
+	$env:choco:sqlserver2016:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+	choco install sqlserver2016
 }
 
 function InstallChocoDevApps
