@@ -32,7 +32,6 @@ $hasDdrive = (Test-Path D:)
 
 function ConfigureBaseSettings()
 {
-	Enable-RemoteDesktop
 	Update-ExecutionPolicy -Policy Unrestricted
 
 	Set-Volume -DriveLetter $env:SystemDrive[0] -NewFileSystemLabel "System"
@@ -71,6 +70,7 @@ function InstallChocoCoreApps()
 
 function InstallChocoHomeApps()
 {
+	Enable-RemoteDesktop							# already enabled on corp machine and it failed when running
 	choco install k-litecodecpackfull               --yes --limitoutput	
 	choco install itunes                            --yes --limitoutput
 }
