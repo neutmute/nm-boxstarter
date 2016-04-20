@@ -73,6 +73,7 @@ function InstallChocoHomeApps()
 	Enable-RemoteDesktop							# already enabled on corp machine and it failed when running
 	choco install k-litecodecpackfull               --yes --limitoutput	
 	choco install itunes                            --yes --limitoutput
+	choco install pidgin                  			--yes --limitoutput
 }
 
 function InstallChocoUserSettings()
@@ -85,7 +86,7 @@ function InstallChocoUserSettings()
 function InstallWindowsUpdate()
 {
 	Enable-MicrosoftUpdate
-	#Install-WindowsUpdate -AcceptEula
+	Install-WindowsUpdate -AcceptEula
 	if (Test-PendingReboot) { Invoke-Reboot }
 }
 
@@ -126,9 +127,8 @@ function InstallSqlServer()
 	    $env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2016"
 	    $env:choco:sqlserver2016:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
 	    choco install sqlserver2016
-    }
-	
-	choco install sqlstudio
+		choco install sqlstudio
+    }	
 }
 
 function InstallChocoDevApps
@@ -148,8 +148,7 @@ function InstallChocoDevApps
 	choco install dotpeek                 --yes --limitoutput
 	choco install nugetpackageexplorer    --yes --limitoutput
 	choco install sourcetree 			  --yes --limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
-	#choco install pidgin                  --yes --limitoutput
-	
+		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
 	choco install visualstudio2015enterprise
@@ -208,6 +207,7 @@ if (Test-Path env:\BoxStarterInstallDev)
 {
 	Write-BoxstarterMessage "Installing dev apps"
 	InstallChocoDevApps
+	InstallSqlServer
 }
 
 if (Test-Path env:\BoxStarterInstallHome)
