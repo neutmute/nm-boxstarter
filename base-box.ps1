@@ -133,21 +133,22 @@ function InstallSqlServer()
 
 function InstallChocoDevApps
 {
-	choco install jdk7		              --yes --limitoutput  #neo4j
-	choco install nsis.install            --yes --limitoutput
-	choco install commandwindowhere       --yes --limitoutput
-	choco install filezilla               --yes --limitoutput
-	choco install putty                   --yes --limitoutput
-	choco install winscp                  --yes --limitoutput
-	choco install wireshark               --yes --limitoutput
-	choco install nmap                    --yes --limitoutput
-	choco install autohotkey.install      --yes --limitoutput
-	choco install windirstat              --yes --limitoutput
-	choco install console2                --yes --limitoutput
-	choco install virtualbox              --yes --limitoutput
-	choco install dotpeek                 --yes --limitoutput
-	choco install nugetpackageexplorer    --yes --limitoutput
-	choco install sourcetree 			  --yes --limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
+	choco install jdk7		          	--yes --limitoutput  #neo4j
+	choco install nsis.install        	--yes --limitoutput
+	choco install commandwindowhere   	--yes --limitoutput
+	choco install filezilla           	--yes --limitoutput
+	choco install putty               	--yes --limitoutput
+	choco install winscp              	--yes --limitoutput
+	choco install wireshark           	--yes --limitoutput
+	choco install nmap                	--yes --limitoutput
+	choco install autohotkey.install  	--yes --limitoutput
+	choco install windirstat          	--yes --limitoutput
+	choco install console2            	--yes --limitoutput
+	choco install virtualbox          	--yes --limitoutput
+	choco install dotpeek             	--yes --limitoutput
+	choco install nugetpackageexplorer	--yes --limitoutput
+	choco install sourcetree 			--yes --limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
+	choco install rdcman 				--yes --limitoutput
 		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
