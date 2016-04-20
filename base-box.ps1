@@ -91,34 +91,42 @@ function InstallWindowsUpdate()
 
 function InstallSqlServer()
 {	
-	if (Test-PendingReboot) { Invoke-Reboot }
+    if (Test-Path env:\choco:sqlserver2008:isoImage)
+    {
+	    if (Test-PendingReboot) { Invoke-Reboot }	
+	    $env:choco:sqlserver2008:INSTANCEID="sql2008"
+	    $env:choco:sqlserver2008:INSTANCENAME="sql2008"
+	    $env:choco:sqlserver2008:AGTSVCACCOUNT="NT AUTHORITY\SYSTEM"
+	    $env:choco:sqlserver2008:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+	    $env:choco:sqlserver2008:SQLSVCACCOUNT="NT AUTHORITY\SYSTEM"
+	    $env:choco:sqlserver2008:INSTALLSQLDATADIR="D:\Data\sql"
+	    choco install sqlserver2008
+    }
 	
-	$env:choco:sqlserver2008:INSTANCEID="sql2008"
-	$env:choco:sqlserver2008:INSTANCENAME="sql2008"
-	$env:choco:sqlserver2008:AGTSVCACCOUNT="NT AUTHORITY\SYSTEM"
-	$env:choco:sqlserver2008:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
-	$env:choco:sqlserver2008:SQLSVCACCOUNT="NT AUTHORITY\SYSTEM"
-	$env:choco:sqlserver2008:INSTALLSQLDATADIR="D:\Data\sql"
-	choco install sqlserver2008
+    if (Test-Path env:\choco:sqlserver2012:isoImage)
+    {
+	    if (Test-PendingReboot) { Invoke-Reboot }
+	    $env:choco:sqlserver2012:INSTALLSQLDATADIR="D:\Data\Sql"
+	    $env:choco:sqlserver2012:INSTANCEID="sql2012"
+	    $env:choco:sqlserver2012:INSTANCENAME="sql2012"
+	    $env:choco:sqlserver2012:FEATURES="SQLENGINE"
+	    $env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2012"
+	    $env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2012"
+	    $env:choco:sqlserver2012:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+	    choco install sqlserver2012
+    }
 	
-	if (Test-PendingReboot) { Invoke-Reboot }
-	$env:choco:sqlserver2012:INSTALLSQLDATADIR="D:\Data\Sql"
-	$env:choco:sqlserver2012:INSTANCEID="sql2012"
-	$env:choco:sqlserver2012:INSTANCENAME="sql2012"
-	$env:choco:sqlserver2012:FEATURES="SQLENGINE"
-	$env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2012"
-	$env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2012"
-	$env:choco:sqlserver2012:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
-	choco install sqlserver2012
-	
-	if (Test-PendingReboot) { Invoke-Reboot }
-	$env:choco:sqlserver2016:INSTALLSQLDATADIR="D:\Data\Sql"
-	$env:choco:sqlserver2016:INSTANCEID="sql2016"
-	$env:choco:sqlserver2016:INSTANCENAME="sql2016"
-	$env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2016"
-	$env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2016"
-	$env:choco:sqlserver2016:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
-	choco install sqlserver2016
+    if (Test-Path env:\choco:sqlserver2016:isoImage)
+    {
+	    if (Test-PendingReboot) { Invoke-Reboot }
+	    $env:choco:sqlserver2016:INSTALLSQLDATADIR="D:\Data\Sql"
+	    $env:choco:sqlserver2016:INSTANCEID="sql2016"
+	    $env:choco:sqlserver2016:INSTANCENAME="sql2016"
+	    $env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2016"
+	    $env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2016"
+	    $env:choco:sqlserver2016:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+	    choco install sqlserver2016
+    }
 	
 	choco install sqlstudio
 }
@@ -209,12 +217,12 @@ if (Test-Path env:\BoxStarterInstallHome)
 
 if ($hasDdrive)
 {
-	Write-BoxstarterMessage "Configuring D:\"
+    Write-BoxstarterMessage "Configuring D:\"
 	
-	Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
+    Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
 	
-	$userDataPath = "D:\Data\Documents"
-	$mediaPath = "D:\Media"
+    $userDataPath = "D:\Data\Documents"
+    $mediaPath = "D:\Media"
 	
     MoveLibrary -libraryName "My Pictures" -newPath (Join-Path $userDataPath "Pictures")
     MoveLibrary -libraryName "Personal"    -newPath (Join-Path $userDataPath "Documents")
