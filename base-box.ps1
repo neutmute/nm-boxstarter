@@ -152,6 +152,7 @@ function InstallChocoDevApps
 	choco install nugetpackageexplorer	--yes --limitoutput
 	choco install sourcetree 			--yes --limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
 	choco install rdcman 				--yes --limitoutput
+	choco install diffmerge				--yes --limitoutput
 		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
