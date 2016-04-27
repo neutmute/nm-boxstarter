@@ -61,31 +61,31 @@ function MoveLibrary {
 
 function InstallChocoCoreApps()
 {
-	choco install firefox                           --yes --limitoutput
-	choco install googlechrome                      --yes --limitoutput
-	choco install flashplayerplugin                 --yes --limitoutput
-	choco install notepadplusplus.install           --yes --limitoutput
-	choco install paint.net                         --yes --limitoutput
-	choco install irfanview                         --yes --limitoutput
-	choco install irfanviewplugins                  --yes --limitoutput
-	choco install 7zip.install                      --yes --limitoutput
-	choco install lastpass			                --yes --limitoutput
+	choco install firefox                           --limitoutput
+	choco install googlechrome                      --limitoutput
+	choco install flashplayerplugin                 --limitoutput
+	choco install notepadplusplus.install           --limitoutput
+	choco install paint.net                         --limitoutput
+	choco install irfanview                         --limitoutput
+	choco install irfanviewplugins                  --limitoutput
+	choco install 7zip.install                      --limitoutput
+	choco install lastpass			        --limitoutput
 	#choco install veracrypt 						--yes --limitoutput #not silent
 }
 
 function InstallChocoHomeApps()
 {
 	Enable-RemoteDesktop							# already enabled on corp machine and it failed when running
-	choco install k-litecodecpackfull               --yes --limitoutput	
-	choco install itunes                            --yes --limitoutput
-	choco install pidgin                  			--yes --limitoutput
+	choco install k-litecodecpackfull               --limitoutput	
+	choco install itunes                            --limitoutput
+	choco install pidgin                  		--limitoutput
 }
 
 function InstallChocoUserSettings()
 {
-	choco install taskbar-never-combine             --yes --limitoutput
-	choco install explorer-show-all-folders         --yes --limitoutput
-	choco install explorer-expand-to-current-folder --yes --limitoutput
+	choco install taskbar-never-combine             --limitoutput
+	choco install explorer-show-all-folders         --limitoutput
+	choco install explorer-expand-to-current-folder --limitoutput
 }
 
 function InstallWindowsUpdate()
@@ -141,23 +141,22 @@ function InstallSqlServer()
 
 function InstallChocoDevApps
 {
-	choco install jdk7		          	--yes --limitoutput  #neo4j
-	choco install nsis.install        	--yes --limitoutput
-	choco install commandwindowhere   	--yes --limitoutput
-	choco install filezilla           	--yes --limitoutput
-	choco install putty               	--yes --limitoutput
-	choco install winscp              	--yes --limitoutput
-	choco install wireshark           	--yes --limitoutput
-	choco install nmap                	--yes --limitoutput
-	choco install autohotkey.install  	--yes --limitoutput
-	choco install windirstat          	--yes --limitoutput
-	choco install console2            	--yes --limitoutput
-	choco install virtualbox          	--yes --limitoutput
-	choco install dotpeek             	--yes --limitoutput
-	choco install nugetpackageexplorer	--yes --limitoutput
-	choco install sourcetree 			--yes --limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
-	choco install rdcman 				--yes --limitoutput
-	choco install diffmerge				--yes --limitoutput
+	choco install jdk7		        --limitoutput  #neo4j
+	choco install nsis.install        	--limitoutput
+	choco install commandwindowhere   	--limitoutput
+	choco install filezilla           	--limitoutput
+	choco install putty               	--limitoutput
+	choco install winscp              	--limitoutput
+	choco install wireshark           	--limitoutput
+	choco install nmap                	--limitoutput
+	choco install autohotkey.install  	--limitoutput
+	choco install console2            	--limitoutput
+	choco install virtualbox          	--limitoutput
+	choco install dotpeek             	--limitoutput
+	choco install nugetpackageexplorer	--limitoutput
+	choco install sourcetree 		--limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
+	choco install rdcman 			--limitoutput
+	choco install diffmerge			--limitoutput
 		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
@@ -206,6 +205,9 @@ function InstallInternetInformationServices()
 	choco install IIS-BasicAuthentication --source windowsfeatures
 }
 
+# disable chocolatey default confirmation behaviour (no need for --yes)
+choco feature enable --name=allowGlobalConfirmation	
+
 ConfigureBaseSettings
 
 Write-BoxstarterMessage "Starting chocolatey installs"
@@ -241,6 +243,9 @@ if ($hasDdrive)
     MoveLibrary -libraryName "My Music"    -newPath (Join-Path $mediaPath "Music")
     MoveLibrary -libraryName "Downloads"   -newPath "D:\Downloads"
 }
+
+# re-enable chocolatey default confirmation behaviour
+choco feature disable --name=allowGlobalConfirmation
 
 Write-BoxstarterMessage "Windows update..."
 InstallWindowsUpdate
