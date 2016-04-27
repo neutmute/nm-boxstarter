@@ -205,6 +205,10 @@ function InstallInternetInformationServices()
 	choco install IIS-BasicAuthentication --source windowsfeatures
 }
 
+# SQL Server requires some KB patches before it will work, so windows update first
+Write-BoxstarterMessage "Windows update..."
+InstallWindowsUpdate
+
 # disable chocolatey default confirmation behaviour (no need for --yes)
 choco feature enable --name=allowGlobalConfirmation	
 
@@ -247,5 +251,3 @@ if ($hasDdrive)
 # re-enable chocolatey default confirmation behaviour
 choco feature disable --name=allowGlobalConfirmation
 
-Write-BoxstarterMessage "Windows update..."
-InstallWindowsUpdate
