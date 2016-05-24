@@ -100,7 +100,7 @@ function InstallSqlServer()
 	#rejected by chocolatey.org since iso image is required  :|
 	$sqlPackageSource = "https://www.myget.org/F/nm-chocolatey-packs/api/v2"
 
-    if (Test-Path env:\choco:sqlserver2008:isoImage)
+    if ((Test-Path env:\choco:sqlserver2008:isoImage) -or (Test-Path env:\choco:sqlserver2008:setupFolder))
     {
 	    if (Test-PendingReboot) { Invoke-Reboot }	
 	    $env:choco:sqlserver2008:INSTANCEID="sql2008"
@@ -112,7 +112,7 @@ function InstallSqlServer()
 	    choco install sqlserver2008 --source=$sqlPackageSource
     }
 	
-    if (Test-Path env:\choco:sqlserver2012:isoImage)
+    if ((Test-Path env:\choco:sqlserver2012:isoImage) -or (Test-Path env:\choco:sqlserver2012:setupFolder))
     {
 	    if (Test-PendingReboot) { Invoke-Reboot }
 	    $env:choco:sqlserver2012:INSTALLSQLDATADIR="D:\Data\Sql"
@@ -125,7 +125,7 @@ function InstallSqlServer()
 	    choco install sqlserver2012 --source=$sqlPackageSource
     }
 	
-    if (Test-Path env:\choco:sqlserver2016:isoImage)
+    if ((Test-Path env:\choco:sqlserver2016:isoImage) -or (Test-Path env:\choco:sqlserver2016:setupFolder))
     {
 	    if (Test-PendingReboot) { Invoke-Reboot }
 	    $env:choco:sqlserver2016:INSTALLSQLDATADIR="D:\Data\Sql"
@@ -159,6 +159,10 @@ function InstallChocoDevApps
 	choco install diffmerge			--limitoutput
 		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
+}
+
+function InstallVisualStudio()
+{
 
 	choco install visualstudio2015enterprise
 	Install-ChocolateyVsixPackage 'PowerShell Tools for Visual Studio 2015' https://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597/file/199313/1/PowerShellTools.14.0.vsix
@@ -166,6 +170,7 @@ function InstallChocoDevApps
 	
 	Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Google\Chrome\Application\chrome.exe"
 	Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe"
+
 }
 
 function InstallInternetInformationServices()
