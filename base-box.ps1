@@ -86,6 +86,19 @@ function InstallChocoUserSettings()
 	choco install taskbar-never-combine             --limitoutput
 	choco install explorer-show-all-folders         --limitoutput
 	choco install explorer-expand-to-current-folder --limitoutput
+	
+	
+}
+
+function SetRegionalSettings(){
+	#http://stackoverflow.com/questions/4235243/how-to-set-timezone-using-powershell
+	&"$env:windir\system32\tzutil.exe" /s "AUS Eastern Standard Time"
+	
+	Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sShortDate -Value dd-MMM-yy
+	Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sCountry -Value Australia
+	Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sShortTime -Value HH:mm
+	Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sTimeFormat -Value HH:mm:ss
+	Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sLanguage -Value ENA
 }
 
 function InstallWindowsUpdate()
@@ -141,7 +154,7 @@ function InstallSqlServer()
 
 function InstallChocoDevApps
 {
-	choco install jdk7		        --limitoutput  #neo4j
+	choco install jdk7		        	--limitoutput  #neo4j
 	choco install nsis.install        	--limitoutput
 	choco install commandwindowhere   	--limitoutput
 	choco install filezilla           	--limitoutput
@@ -153,24 +166,23 @@ function InstallChocoDevApps
 	choco install console2            	--limitoutput
 	choco install virtualbox          	--limitoutput
 	choco install dotpeek             	--limitoutput
+	choco install nuget.commandline		--limitoutput
 	choco install nugetpackageexplorer	--limitoutput
-	choco install sourcetree 		--limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
-	choco install rdcman 			--limitoutput
-	choco install diffmerge			--limitoutput
+	choco install sourcetree 			--limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
+	choco install rdcman 				--limitoutput
+	choco install diffmerge				--limitoutput
 		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 }
 
 function InstallVisualStudio()
 {
-
 	choco install visualstudio2015enterprise
 	Install-ChocolateyVsixPackage 'PowerShell Tools for Visual Studio 2015' https://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597/file/199313/1/PowerShellTools.14.0.vsix
 	Install-ChocolateyVsixPackage 'Productivity Power Tools 2015' https://visualstudiogallery.msdn.microsoft.com/34ebc6a2-2777-421d-8914-e29c1dfa7f5d/file/169971/1/ProPowerTools.vsix
 	
 	Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Google\Chrome\Application\chrome.exe"
 	Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe"
-
 }
 
 function InstallInternetInformationServices()
@@ -209,6 +221,8 @@ function InstallInternetInformationServices()
 	choco install IIS-HttpCompressionStatic --source windowsfeatures
 	choco install IIS-BasicAuthentication --source windowsfeatures
 }
+
+SetRegionalSettings
 
 # SQL Server requires some KB patches before it will work, so windows update first
 Write-BoxstarterMessage "Windows update..."
