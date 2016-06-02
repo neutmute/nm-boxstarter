@@ -142,6 +142,7 @@ function InstallSqlServer()
 	
     if ((Test-Path env:\choco:sqlserver2016:isoImage) -or (Test-Path env:\choco:sqlserver2016:setupFolder))
     {
+		# Note: No support for Windows 7 https://msdn.microsoft.com/en-us/library/ms143506.aspx
 		if (Test-PendingReboot) { Invoke-Reboot }
 		$env:choco:sqlserver2016:INSTALLSQLDATADIR="D:\Data\Sql"
 		$env:choco:sqlserver2016:INSTANCEID="sql2016"
