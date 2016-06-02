@@ -142,15 +142,14 @@ function InstallSqlServer()
 	
     if ((Test-Path env:\choco:sqlserver2016:isoImage) -or (Test-Path env:\choco:sqlserver2016:setupFolder))
     {
-	    if (Test-PendingReboot) { Invoke-Reboot }
-	    $env:choco:sqlserver2016:INSTALLSQLDATADIR="D:\Data\Sql"
-	    $env:choco:sqlserver2016:INSTANCEID="sql2016"
-	    $env:choco:sqlserver2016:INSTANCENAME="sql2016"
-	    $env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2016"
-	    $env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2016"
-	    $env:choco:sqlserver2016:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+		if (Test-PendingReboot) { Invoke-Reboot }
+		$env:choco:sqlserver2016:INSTALLSQLDATADIR="D:\Data\Sql"
+		$env:choco:sqlserver2016:INSTANCEID="sql2016"
+		$env:choco:sqlserver2016:INSTANCENAME="sql2016"
+		$env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2016"
+		$env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2016"
+		$env:choco:sqlserver2016:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
 		choco install sqlserver2016 --source=$sqlPackageSource
-		choco install sqlstudio
     }	
 }
 
