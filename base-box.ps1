@@ -69,7 +69,8 @@ function InstallChocoCoreApps()
 	choco install irfanview                         --limitoutput
 	choco install irfanviewplugins                  --limitoutput
 	choco install 7zip.install                      --limitoutput
-	choco install lastpass			        --limitoutput
+	choco install lastpass			        		--limitoutput
+	choco install launchy 							--limitoutput
 	#choco install veracrypt 						--yes --limitoutput #not silent
 }
 
