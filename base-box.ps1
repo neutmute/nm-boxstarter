@@ -125,6 +125,7 @@ function InstallSqlServer()
 	    $env:choco:sqlserver2008:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
 	    $env:choco:sqlserver2008:SQLSVCACCOUNT="NT AUTHORITY\SYSTEM"
 	    $env:choco:sqlserver2008:INSTALLSQLDATADIR="D:\Data\sql"
+        $env:choco:sqlserver2008:SECURITYMODE="SQL"                 # mixed mode auth
 	    choco install sqlserver2008 --source=$sqlPackageSource
     }
 	
@@ -138,6 +139,7 @@ function InstallSqlServer()
 	    $env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2012"
 	    $env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2012"
 	    $env:choco:sqlserver2012:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+        $env:choco:sqlserver2012:SECURITYMODE="SQL"                 # mixed mode auth
 	    choco install sqlserver2012 --source=$sqlPackageSource
     }
 	
@@ -151,6 +153,7 @@ function InstallSqlServer()
 		$env:choco:sqlserver2016:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2016"
 		$env:choco:sqlserver2016:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2016"
 		$env:choco:sqlserver2016:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
+        $env:choco:sqlserver2016:SECURITYMODE="SQL"                 # mixed mode auth
 		choco install sqlserver2016 --source=$sqlPackageSource
     }	
 }
