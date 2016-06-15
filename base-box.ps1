@@ -183,7 +183,7 @@ function InstallChocoDevApps
 
 function InstallVisualStudio()
 {
-	choco install visualstudio2015enterprise
+	choco install visualstudio2015enterprise --source=https://www.myget.org/F/chocolatey-vs/api/v2 #kennethB is slow pushing to nuget
 	Install-ChocolateyVsixPackage 'PowerShell Tools for Visual Studio 2015' https://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597/file/199313/1/PowerShellTools.14.0.vsix
 	Install-ChocolateyVsixPackage 'Productivity Power Tools 2015' https://visualstudiogallery.msdn.microsoft.com/34ebc6a2-2777-421d-8914-e29c1dfa7f5d/file/169971/1/ProPowerTools.vsix
 	
@@ -249,6 +249,7 @@ if (Test-Path env:\BoxStarterInstallDev)
 	Write-BoxstarterMessage "Installing dev apps"
 	InstallChocoDevApps
 	InstallSqlServer
+    InstallVisualStudio
 }
 
 if (Test-Path env:\BoxStarterInstallHome)
