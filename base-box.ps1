@@ -61,19 +61,20 @@ function MoveLibrary {
 
 function InstallChocoCoreApps()
 {
-	choco install firefox                           --limitoutput
-	choco install googlechrome                      --limitoutput
-	choco install flashplayerplugin                 --limitoutput
-	choco install notepadplusplus.install           --limitoutput
-	choco install paint.net                         --limitoutput
-	choco install irfanview                         --limitoutput
-	choco install irfanviewplugins                  --limitoutput
-	choco install 7zip.install                      --limitoutput
-	choco install lastpass			        		--limitoutput
-	choco install launchy 							--limitoutput
-	choco install agentransack						--limitoutput
+	choco install firefox                   --limitoutput
+	choco install googlechrome              --limitoutput
+	choco install flashplayerplugin         --limitoutput
+	choco install notepadplusplus.install   --limitoutput
+	choco install paint.net                 --limitoutput
+	choco install irfanview                 --limitoutput
+	choco install irfanviewplugins          --limitoutput
+	choco install 7zip.install              --limitoutput
+	choco install lastpass			        --limitoutput
+	choco install launchy 				    --limitoutput
+	choco install agentransack			    --limitoutput
+	choco install wintail				    --limitoutput
 	
-	#choco install veracrypt 						--yes --limitoutput #not silent
+	#choco install veracrypt 			    --limitoutput #not silent
 }
 
 function InstallChocoHomeApps()
