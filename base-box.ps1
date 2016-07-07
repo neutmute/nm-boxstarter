@@ -82,7 +82,8 @@ function InstallChocoHomeApps()
 	Enable-RemoteDesktop							# already enabled on corp machine and it failed when running
 	choco install k-litecodecpackfull               --limitoutput	
 	choco install itunes                            --limitoutput
-	choco install pidgin                  		--limitoutput
+	choco install pidgin                  		    --limitoutput
+	choco install handbrake.install					--limitoutput
 }
 
 function InstallChocoUserSettings()
