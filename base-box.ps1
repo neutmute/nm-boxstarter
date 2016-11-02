@@ -180,6 +180,8 @@ function InstallChocoDevApps
 	choco install diffmerge				--limitoutput
 		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
+
+    choco install markdownpad2          --limitoutput
 }
 
 function InstallVisualStudio()
