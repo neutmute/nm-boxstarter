@@ -178,6 +178,7 @@ function InstallChocoDevApps
 	choco install sourcetree 			--limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
 	choco install rdcman 				--limitoutput
 	choco install diffmerge				--limitoutput
+    choco install cmake 				--limitoutput #emgucv
 		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
