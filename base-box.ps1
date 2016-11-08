@@ -179,6 +179,7 @@ function InstallChocoDevApps
 	choco install rdcman 				--limitoutput
 	choco install diffmerge				--limitoutput
     choco install cmake 				--limitoutput #emgucv
+    choco install tightvnc 				--limitoutput #rasbperry pi
 		
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
