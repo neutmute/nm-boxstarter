@@ -73,7 +73,7 @@ function InstallChocoCoreApps()
 	choco install launchy 				    --limitoutput
 	choco install agentransack			    --limitoutput
 	choco install wintail				    --limitoutput
-	
+    
 	#choco install veracrypt 			    --limitoutput #not silent
 }
 
@@ -91,8 +91,6 @@ function InstallChocoUserSettings()
 	choco install taskbar-never-combine             --limitoutput
 	choco install explorer-show-all-folders         --limitoutput
 	choco install explorer-expand-to-current-folder --limitoutput
-	
-	
 }
 
 function SetRegionalSettings(){
@@ -179,8 +177,7 @@ function InstallChocoDevApps
 	choco install rdcman 				--limitoutput
 	choco install diffmerge				--limitoutput
     choco install cmake 				--limitoutput #emgucv
-    choco install tightvnc 				--limitoutput #rasbperry pi
-		
+    choco install audacity				--limitoutput
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
     choco install markdownpad2          --limitoutput
