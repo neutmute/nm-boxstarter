@@ -178,6 +178,7 @@ function InstallChocoDevApps
 	choco install diffmerge				--limitoutput
     choco install cmake 				--limitoutput #emgucv
     choco install audacity				--limitoutput
+    choco install ffmpeg                --limitoutput
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
     choco install markdownpad2          --limitoutput
