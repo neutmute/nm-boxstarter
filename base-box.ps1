@@ -19,10 +19,13 @@
 	[Environment]::SetEnvironmentVariable("choco:sqlserver2016:isoImage", "D:\Downloads\en_sql_server_2016_rc_2_x64_dvd_8509698.iso", "Machine") # for reboots
 	[Environment]::SetEnvironmentVariable("choco:sqlserver2016:isoImage", "D:\Downloads\en_sql_server_2016_rc_2_x64_dvd_8509698.iso", "Process") # for right now
 	
-	
 	# If Home Machine
 	[Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Machine") # for reboots
 	[Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Process") # for right now
+    
+	# If HTPC
+	[Environment]::SetEnvironmentVariable("BoxStarterInstallHtpc", "1", "Machine") # for reboots
+	[Environment]::SetEnvironmentVariable("BoxStarterInstallHtpc", "1", "Process") # for right now
 	
 #START
 	START http://boxstarter.org/package/nr/url?https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1
@@ -77,6 +80,17 @@ function InstallChocoCoreApps()
 	#choco install veracrypt 			    --limitoutput #not silent
 }
 
+function InstallChocoHtpcApps()
+{
+    choco install k-litecodecpackfull               --limitoutput
+    choco install mssql2014express-defaultinstance  --limitoutput       # for argus tv
+    choco install plexmediaserver                   --limitoutput
+    choco install steam                             --limitoutput
+    choco install setpoint                          --limitoutput
+    choco install syncback				            --limitoutput
+    choco install kodi  				            --limitoutput
+}
+
 function InstallChocoHomeApps()
 {
 	Enable-RemoteDesktop							# already enabled on corp machine and it failed when running
@@ -84,6 +98,8 @@ function InstallChocoHomeApps()
 	choco install itunes                            --limitoutput
 	choco install pidgin                  		    --limitoutput
 	choco install handbrake.install					--limitoutput
+    choco install steam                             --limitoutput
+    choco install syncback				            --limitoutput
 }
 
 function InstallChocoUserSettings()
@@ -258,6 +274,11 @@ if (Test-Path env:\BoxStarterInstallDev)
 if (Test-Path env:\BoxStarterInstallHome)
 {
 	InstallChocoHomeApps
+}
+
+if (Test-Path env:\BoxStarterInstallHtpc)
+{
+	InstallChocoHtpcApps
 }
 
 if ($hasDdrive)
