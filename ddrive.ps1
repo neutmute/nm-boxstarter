@@ -1,31 +1,18 @@
+. ".\Set-KnownFolderPath.ps1"
 <# 
-	
-	START http://boxstarter.org/package/nr/url?https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/ddrive.ps1
-
+	BoxStarter way wasn't working in Win10?   
 #>
 
-    function MoveLibrary {
-    param(
-        $libraryName,
-        $newPath
-    )
-    
-    if(-not (Test-Path $newPath))  #idempotent
-	{
-        Move-LibraryDirectory -libraryName $libraryName -newPath $newPath
-    }
-}
+Write-Host "Configuring D:\"
 
-    Write-BoxstarterMessage "Configuring D:\"
-	
-    Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
-	
-    $userDataPath = "D:\Data\Documents"
-    $mediaPath = "D:\Media"
-	
-    MoveLibrary -libraryName "My Pictures" -newPath (Join-Path $userDataPath "Pictures")
-    MoveLibrary -libraryName "Personal"    -newPath (Join-Path $userDataPath "Documents")
-    MoveLibrary -libraryName "Desktop"     -newPath (Join-Path $userDataPath "Desktop")
-    MoveLibrary -libraryName "My Video"    -newPath (Join-Path $mediaPath "Videos")
-    MoveLibrary -libraryName "My Music"    -newPath (Join-Path $mediaPath "Music")
-    MoveLibrary -libraryName "Downloads"   -newPath "D:\Downloads"
+Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
+
+$userDataPath = "D:\Data\Documents"
+$mediaPath    = "D:\Media"
+
+Set-KnownFolderPath -KnownFolder 'Pictures'     -Path (Join-Path $userDataPath "Pictures")
+Set-KnownFolderPath -KnownFolder 'Documents'    -Path (Join-Path $userDataPath "Documents")
+Set-KnownFolderPath -KnownFolder 'Desktop'      -Path (Join-Path $userDataPath "Desktop")
+Set-KnownFolderPath -KnownFolder 'Videos'       -Path (Join-Path $mediaPath "Videos")
+Set-KnownFolderPath -KnownFolder 'Music'        -Path (Join-Path $mediaPath "Music")
+Set-KnownFolderPath -KnownFolder 'Downloads'    -Path "D:\Downloads"
