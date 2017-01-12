@@ -64,6 +64,7 @@ function MoveLibrary {
 
 function InstallChocoCoreApps()
 {
+	choco install chocolatey    		    --limitoutput
 	choco install firefox                   --limitoutput
 	choco install googlechrome              --limitoutput
 	choco install flashplayerplugin         --limitoutput
