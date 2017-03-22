@@ -85,6 +85,7 @@ function InstallChocoHtpcApps()
 {
     choco install k-litecodecpackfull               --limitoutput
     choco install mssql2014express-defaultinstance  --limitoutput       # for argus tv
+	choco install sql-server-management-studio		--limitoutput
     choco install plexmediaserver                   --limitoutput
     choco install steam                             --limitoutput
     choco install setpoint                          --limitoutput
