@@ -88,9 +88,11 @@ function InstallChocoHtpcApps()
 	choco install sql-server-management-studio		--limitoutput
     choco install plexmediaserver                   --limitoutput
     choco install steam                             --limitoutput
-    ##choco install setpoint                          --limitoutput ##buggy
     choco install syncback				            --limitoutput
     choco install kodi  				            --limitoutput
+	choco install tightvnc                          --limitoutput # for hippo remote
+	choco install setpoint                          --limitoutput ##buggy?
+	
 }
 
 function InstallChocoHomeApps()
