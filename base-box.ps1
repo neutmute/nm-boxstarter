@@ -102,8 +102,9 @@ function InstallChocoHomeApps()
 	choco install itunes                            --limitoutput
 	choco install pidgin                  		    --limitoutput
 	choco install handbrake.install					--limitoutput
-    choco install steam                             --limitoutput
-    choco install syncback				            --limitoutput
+        choco install steam                             --limitoutput
+        choco install syncback				            --limitoutput
+	choco install spotify							--limitoutput
 }
 
 function InstallChocoUserSettings()
@@ -199,6 +200,8 @@ function InstallChocoDevApps
     choco install cmake 				--limitoutput #emgucv
     choco install audacity				--limitoutput
     choco install fiddler4              --limitoutput
+	choco install visualstudiocode      --limitoutput
+	choco install nodejs	            --limitoutput
 	choco install git.install -params '"/GitAndUnixToolsOnPath"'	--yes --limitoutput
 
     choco install markdownpad2          --limitoutput
