@@ -77,6 +77,7 @@ function InstallChocoCoreApps()
 	choco install launchy 				    --limitoutput
 	choco install agentransack			    --limitoutput
 	choco install wintail				    --limitoutput
+    choco install bulkrenameutility         --limitoutput
     
 	#choco install veracrypt 			    --limitoutput #not silent
 }
