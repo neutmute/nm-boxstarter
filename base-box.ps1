@@ -195,7 +195,7 @@ function InstallChocoDevApps
 	choco install dotpeek             	--limitoutput
 	choco install nuget.commandline		--limitoutput
 	choco install nugetpackageexplorer	--limitoutput
-	choco install sourcetree 			--limitoutput --version 1.7.0.32509 		#1.8 destroyed UX
+	choco install sourcetree 			--limitoutput
 	choco install rdcman 				--limitoutput
 	choco install diffmerge				--limitoutput
     choco install cmake 				--limitoutput #emgucv
