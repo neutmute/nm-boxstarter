@@ -106,7 +106,8 @@ function InstallChocoHomeApps()
     choco install steam                             --limitoutput
     choco install syncback                          --limitoutput
     choco install spotify                           --limitoutput
-    choco install wakemeonlan
+    choco install wakemeonlan                       --limitoutput
+    choco install evernote                          --limitoutput
 }
 
 function InstallChocoUserSettings()
@@ -272,14 +273,6 @@ Write-BoxstarterMessage "Starting chocolatey installs"
 InstallChocoUserSettings    
 InstallChocoCoreApps
 
-if (Test-Path env:\BoxStarterInstallDev)
-{
-    Write-BoxstarterMessage "Installing dev apps"
-    InstallChocoDevApps
-    InstallSqlServer
-    InstallVisualStudio
-}
-
 if (Test-Path env:\BoxStarterInstallHome)
 {
     InstallChocoHomeApps
@@ -305,6 +298,15 @@ if ($hasDdrive)
     MoveLibrary -libraryName "My Video"    -newPath (Join-Path $mediaPath "Videos")
     MoveLibrary -libraryName "My Music"    -newPath (Join-Path $mediaPath "Music")
     MoveLibrary -libraryName "Downloads"   -newPath "D:\Downloads"
+}
+
+# Put last as the big SQL server / VS2017 tend to fail and kill Boxstarter it seems
+if (Test-Path env:\BoxStarterInstallDev)
+{
+    Write-BoxstarterMessage "Installing dev apps"
+    InstallChocoDevApps
+    InstallSqlServer
+    InstallVisualStudio
 }
 
 # re-enable chocolatey default confirmation behaviour
