@@ -205,7 +205,9 @@ function InstallChocoDevApps
     choco install fiddler4              --limitoutput
     choco install visualstudiocode      --limitoutput
     choco install nodejs                --limitoutput
-    choco install git.install -params '"/GitAndUnixToolsOnPath"'    --yes --limitoutput
+    choco install checksum              --limitoutput 
+    choco install git.install -params '"/GitAndUnixToolsOnPath"' --limitoutput
+    choco install gitextensions         --limitoutput
 
     choco install markdownpad2          --limitoutput
 }
