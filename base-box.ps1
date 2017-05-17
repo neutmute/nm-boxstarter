@@ -208,7 +208,7 @@ function InstallChocoDevApps
     choco install checksum              --limitoutput 
     choco install git.install -params '"/GitAndUnixToolsOnPath"' --limitoutput
     choco install gitextensions         --limitoutput
-
+    choco install atom                  --limitoutput
     choco install markdownpad2          --limitoutput
 }
 
