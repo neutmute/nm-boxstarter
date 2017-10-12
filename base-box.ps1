@@ -92,8 +92,8 @@ function InstallChocoHtpcApps()
     choco install steam                             --limitoutput
     choco install syncback                          --limitoutput
     choco install kodi                              --limitoutput
-    choco install tightvnc                          --limitoutput # for hippo remote
-    choco install setpoint                          --limitoutput ##buggy?
+    choco install tightvnc                          --limitoutput       # for hippo remote
+    choco install setpoint                          --limitoutput       # buggy?
     
 }
 
@@ -109,6 +109,7 @@ function InstallChocoHomeApps()
     choco install spotify                           --limitoutput
     choco install wakemeonlan                       --limitoutput
     choco install evernote                          --limitoutput
+    choco install calibre                           --limitoutput
 }
 
 function InstallChocoUserSettings()
