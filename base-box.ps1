@@ -62,61 +62,86 @@ function MoveLibrary {
     }
 }
 
+function InstallChocoApps($packageArray){
+
+    foreach ($package in $packageArray) {
+	    &choco install $package --limitoutput
+    }
+
+}
+
 function InstallChocoCoreApps()
 {
-    choco install chocolatey                --limitoutput
-    choco install firefox                   --limitoutput
-    choco install googlechrome              --limitoutput
-    choco install flashplayerplugin         --limitoutput
-    choco install notepadplusplus.install   --limitoutput
-    choco install paint.net                 --limitoutput
-    choco install irfanview                 --limitoutput
-    choco install irfanviewplugins          --limitoutput
-    choco install 7zip.install              --limitoutput
-    choco install lastpass                  --limitoutput
-    choco install launchy                   --limitoutput
-    choco install agentransack              --limitoutput
-    choco install wintail                   --limitoutput
-    choco install bulkrenameutility         --limitoutput
-    choco install fscapture                 --limitoutput
-    
+    $coreApps = @(
+        'chocolatey'
+        ,'firefox'
+        ,'googlechrome'
+        ,'flashplayerplugin'
+        ,'notepadplusplus.install'
+        ,'paint.net'
+        ,'irfanview'
+        ,'irfanviewplugins'
+        ,'7zip.install'
+        ,'lastpass'
+        ,'launchy'
+        ,'agentransack'
+        ,'wintail'
+        ,'bulkrenameutility'
+        ,'fscapture'
+    )
+
+    InstallChocoApps $coreApps
+
     #choco install veracrypt                --limitoutput #not silent
 }
 
 function InstallChocoHtpcApps()
 {
-    choco install k-litecodecpackfull               --limitoutput
-    choco install mssql2014express-defaultinstance  --limitoutput       # for argus tv
-    choco install sql-server-management-studio      --limitoutput
-    choco install plexmediaserver                   --limitoutput
-    choco install steam                             --limitoutput
-    choco install syncback                          --limitoutput
-    choco install kodi                              --limitoutput
-    choco install tightvnc                          --limitoutput       # for hippo remote
-    choco install setpoint                          --limitoutput       # buggy?
-    
+    $htpcApps = @(
+        'k-litecodecpackfull'
+        ,'mssql2014express-defaultinstance'
+        ,'sql-server-management-studio'
+        ,'plexmediaserver'
+        ,'steam'
+        ,'syncback'
+        ,'kodi'
+        #'tightvnc'
+        #'setpoint'  # logitech
+    )
+
+    InstallChocoApps $htpcApps    
 }
 
 function InstallChocoHomeApps()
 {
     Enable-RemoteDesktop                            # already enabled on corp machine and it failed when running
-    choco install k-litecodecpackfull               --limitoutput   
-    choco install itunes                            --limitoutput
-    choco install pidgin                            --limitoutput
-    choco install handbrake.install                 --limitoutput
-    choco install steam                             --limitoutput
-    choco install syncback                          --limitoutput
-    choco install spotify                           --limitoutput
-    choco install wakemeonlan                       --limitoutput
-    choco install evernote                          --limitoutput
-    choco install calibre                           --limitoutput
+
+    $homeApps = @(
+        'k-litecodecpackfull'
+        ,'itunes'
+        ,'pidgin'
+        ,'handbrake.install'
+        ,'steam'
+        ,'syncback'
+        ,'spotify'
+        ,'wakemeonlan'
+        ,'evernote'
+        ,'calibre'
+    )
+
+    InstallChocoApps $homeApps
 }
 
 function InstallChocoUserSettings()
 {
-    choco install taskbar-never-combine             --limitoutput
-    choco install explorer-show-all-folders         --limitoutput
-    choco install explorer-expand-to-current-folder --limitoutput
+
+    $userSettings = @(
+        'taskbar-never-combine'
+        ,'explorer-show-all-folders'
+        ,'explorer-expand-to-current-folder'
+    )
+    
+    InstallChocoApps $userSettings
 }
 
 function SetRegionalSettings(){
@@ -185,33 +210,39 @@ function InstallSqlServer()
 
 function InstallChocoDevApps
 {
-    choco install jdk7                  --limitoutput  #neo4j
-    choco install nsis.install          --limitoutput
-    choco install commandwindowhere     --limitoutput
-    choco install filezilla             --limitoutput
-    choco install putty                 --limitoutput
-    choco install winscp                --limitoutput
-    choco install wireshark             --limitoutput
-    choco install nmap                  --limitoutput
-    choco install autohotkey.install    --limitoutput
-    choco install console2              --limitoutput
-    choco install virtualbox            --limitoutput
-    choco install dotpeek               --limitoutput
-    choco install nuget.commandline     --limitoutput
-    choco install nugetpackageexplorer  --limitoutput
-    choco install sourcetree            --limitoutput
-    choco install rdcman                --limitoutput
-    choco install diffmerge             --limitoutput
-    choco install cmake                 --limitoutput #emgucv
-    choco install audacity              --limitoutput
-    choco install fiddler4              --limitoutput
-    choco install visualstudiocode      --limitoutput
-    choco install nodejs                --limitoutput
-    choco install checksum              --limitoutput 
-    choco install git.install -params '"/GitAndUnixToolsOnPath"' --limitoutput
-    choco install gitextensions         --limitoutput
-    choco install atom                  --limitoutput
-    choco install markdownpad2          --limitoutput
+    #choco install jdk7                  --limitoutput  #neo4j - but can use docker now
+    #choco install markdownpad2          --limitoutput   #replaced with atom
+
+    $devApps = @(
+        'nsis.install'
+        ,'commandwindowhere'
+        ,'filezilla'
+        ,'putty'
+        ,'winscp'
+        ,'wireshark'
+        ,'nmap'
+        ,'autohotkey.install'
+        ,'console2'
+        ,'virtualbox'
+        ,'dotpeek'
+        ,'nuget.commandline'
+        ,'nugetpackageexplorer'
+        ,'sourcetree'
+        ,'rdcman'
+        ,'diffmerge'
+        ,'cmake'                     #emgucv
+        ,'audacity'
+        ,'fiddler4'
+        ,'visualstudiocode'
+        ,'nodejs'
+        ,'checksum'
+        ,'gitextensions'
+        ,'atom'
+    )
+    
+    InstallChocoApps $devApps
+
+    git.install -params '"/GitAndUnixToolsOnPath"' --limitoutput
 }
 
 function InstallVisualStudio()
@@ -226,39 +257,45 @@ function InstallVisualStudio()
 
 function InstallInternetInformationServices()
 {
-    choco install IIS-WebServerRole --source windowsfeatures
-    choco install IIS-WebServer --source windowsfeatures
-    choco install IIS-WebServerManagementTools --source windowsfeatures
-    choco install IIS-ManagementScriptingTools --source windowsfeatures
-    choco install IIS-IIS6ManagementCompatibility --source windowsfeatures
-    choco install IIS-Metabase --source windowsfeatures
-    choco install IIS-ManagementConsole --source windowsfeatures
-
-    choco install IIS-CommonHttpFeatures --source windowsfeatures
-    choco install IIS-HttpErrors --source windowsfeatures
-    choco install IIS-HttpRedirect --source windowsfeatures
-    choco install IIS-StaticContent --source windowsfeatures
-
-    choco install IIS-ApplicationDevelopment --source windowsfeatures
-    choco install NetFx4Extended-ASPNET45 --source windowsfeatures
-    choco install IIS-NetFxExtensibility45 --source windowsfeatures
-    choco install IIS-ISAPIFilter --source windowsfeatures
-    choco install IIS-ISAPIExtensions --source windowsfeatures
-    choco install IIS-RequestFiltering --source windowsfeatures
-    choco install IIS-ASPNET45 --source windowsfeatures
-    choco install IIS-ApplicationInit --source windowsfeatures
-
-    choco install IIS-HealthAndDiagnostics --source windowsfeatures
-    choco install IIS-HttpLogging --source windowsfeatures
-    choco install IIS-LoggingLibraries --source windowsfeatures
-    choco install IIS-RequestMonitor --source windowsfeatures
-    choco install IIS-HttpTracing --source windowsfeatures
-    choco install IIS-CustomLogging --source windowsfeatures
-
-    choco install IIS-Performance --source windowsfeatures
-    choco install IIS-HttpCompressionDynamic --source windowsfeatures
-    choco install IIS-HttpCompressionStatic --source windowsfeatures
-    choco install IIS-BasicAuthentication --source windowsfeatures
+    $windowsFeatures = @(
+        'IIS-WebServerRole'
+        ,'IIS-WebServer'
+        ,'IIS-WebServerManagementTools'
+        ,'IIS-ManagementScriptingTools'
+        ,'IIS-IIS6ManagementCompatibility'
+        ,'IIS-Metabase'
+        ,'IIS-ManagementConsole'
+        
+        ,'IIS-CommonHttpFeatures'
+        ,'IIS-HttpErrors'
+        ,'IIS-HttpRedirect'
+        ,'IIS-StaticContent'
+        
+        ,'IIS-ApplicationDevelopment'
+        ,'NetFx4Extended-ASPNET45'
+        ,'IIS-NetFxExtensibility45'
+        ,'IIS-ISAPIFilter'
+        ,'IIS-ISAPIExtensions'
+        ,'IIS-RequestFiltering'
+        ,'IIS-ASPNET45'
+        ,'IIS-ApplicationInit'
+        
+        ,'IIS-HealthAndDiagnostics'
+        ,'IIS-HttpLogging'
+        ,'IIS-LoggingLibraries'
+        ,'IIS-RequestMonitor'
+        ,'IIS-HttpTracing'
+        ,'IIS-CustomLogging'
+        
+        ,'IIS-Performance'
+        ,'IIS-HttpCompressionDynamic'
+        ,'IIS-HttpCompressionStatic'
+        ,'IIS-BasicAuthentication'
+    )
+    
+    foreach ($package in $windowsFeatures) {
+	    &choco install $package  --source windowsfeatures
+    }
 }
 
 SetRegionalSettings
