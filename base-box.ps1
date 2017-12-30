@@ -127,6 +127,7 @@ function InstallChocoHomeApps()
         ,'wakemeonlan'
         ,'evernote'
         ,'calibre'
+        ,'imgburn'
     )
 
     InstallChocoApps $homeApps
@@ -351,5 +352,5 @@ if (Test-Path env:\BoxStarterInstallDev)
 }
 
 # re-enable chocolatey default confirmation behaviour
-choco feature disable --name=allowGlobalConfirmation
+#choco feature disable --name=allowGlobalConfirmation
 
