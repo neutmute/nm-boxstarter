@@ -36,7 +36,8 @@ $Boxstarter.RebootOk=$true
 $Boxstarter.NoPassword=$false
 $Boxstarter.AutoLogin=$true
 
-$hasDdrive = (Test-Path D:)
+# Need to ensure D: exists but also that it isn't the CD ROM
+$hasDdrive = -not((Get-CimInstance Win32_LogicalDisk | Where-Object{($_.DriveType -eq 3) -and ($_.DeviceID -eq "D:")}) -eq $null)
 
 function ConfigureBaseSettings()
 {
