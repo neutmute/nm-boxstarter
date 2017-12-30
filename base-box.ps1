@@ -88,6 +88,7 @@ function InstallChocoCoreApps()
         ,'wintail'
         ,'bulkrenameutility'
         ,'fscapture'
+        ,'shutup10'  # Windows 10 privacy
     )
 
     InstallChocoApps $coreApps
@@ -306,7 +307,7 @@ Write-BoxstarterMessage "Windows update..."
 InstallWindowsUpdate
 
 # disable chocolatey default confirmation behaviour (no need for --yes)
-choco feature enable --name=allowGlobalConfirmation 
+choco feature enable --name=allowGlobalConfirmation
 
 ConfigureBaseSettings
 
