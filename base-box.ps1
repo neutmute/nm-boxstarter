@@ -89,12 +89,12 @@ function InstallChocoCoreApps()
         ,'wintail'
         ,'bulkrenameutility'
         ,'fscapture'
-        ,'shutup10'  # Windows 10 privacy
+        ,'shutup10'  # Windows 10 privacy. Execute with OOSU10.exe
+        ,'veracrypt'
+        
     )
 
     InstallChocoApps $coreApps
-
-    #choco install veracrypt                --limitoutput #not silent
 }
 
 function InstallChocoHtpcApps()
@@ -245,7 +245,7 @@ function InstallChocoDevApps
     
     InstallChocoApps $devApps
 
-    git.install -params '"/GitAndUnixToolsOnPath"' --limitoutput
+    choco install git.install -params '"/GitAndUnixToolsOnPath"' --limitoutput
 }
 
 function InstallVisualStudio()
