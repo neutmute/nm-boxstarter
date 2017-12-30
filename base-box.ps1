@@ -32,6 +32,60 @@
 
 #>
 
+$userSettingsApps = @(
+    'taskbar-never-combine'
+    ,'explorer-show-all-folders'
+    ,'explorer-expand-to-current-folder'
+)
+
+$coreApps = @(
+    'chocolatey'
+    ,'firefox'
+    ,'googlechrome'
+    ,'flashplayerplugin'
+    ,'notepadplusplus.install'
+    ,'paint.net'
+    ,'irfanview'
+    ,'irfanviewplugins'
+    ,'7zip.install'
+    ,'lastpass'
+    ,'launchy'
+    ,'agentransack'
+    ,'wintail'
+    ,'bulkrenameutility'
+    ,'fscapture'
+    ,'shutup10'  # Windows 10 privacy. Execute with OOSU10.exe
+    ,'veracrypt'        
+)
+
+$homeApps = @(
+    'k-litecodecpackfull'
+    ,'itunes'
+    ,'pidgin'
+    ,'handbrake.install'
+    ,'steam'
+    ,'syncback'
+    ,'spotify'
+    ,'wakemeonlan'
+    ,'evernote'
+    ,'calibre'
+    ,'imgburn'
+    ,'winamp'        
+    ,'audacity'
+)
+
+$htpcApps = @(
+    'k-litecodecpackfull'
+    ,'mssql2014express-defaultinstance'
+    ,'sql-server-management-studio'
+    ,'plexmediaserver'
+    ,'steam'
+    ,'syncback'
+    ,'kodi'
+    #'tightvnc'
+    #'setpoint'  # logitech
+)
+
 $Boxstarter.RebootOk=$true
 $Boxstarter.NoPassword=$false
 $Boxstarter.AutoLogin=$true
@@ -71,81 +125,6 @@ function InstallChocoApps($packageArray){
 
 }
 
-function InstallChocoCoreApps()
-{
-    $coreApps = @(
-        'chocolatey'
-        ,'firefox'
-        ,'googlechrome'
-        ,'flashplayerplugin'
-        ,'notepadplusplus.install'
-        ,'paint.net'
-        ,'irfanview'
-        ,'irfanviewplugins'
-        ,'7zip.install'
-        ,'lastpass'
-        ,'launchy'
-        ,'agentransack'
-        ,'wintail'
-        ,'bulkrenameutility'
-        ,'fscapture'
-        ,'shutup10'  # Windows 10 privacy. Execute with OOSU10.exe
-        ,'veracrypt'
-        
-    )
-
-    InstallChocoApps $coreApps
-}
-
-function InstallChocoHtpcApps()
-{
-    $htpcApps = @(
-        'k-litecodecpackfull'
-        ,'mssql2014express-defaultinstance'
-        ,'sql-server-management-studio'
-        ,'plexmediaserver'
-        ,'steam'
-        ,'syncback'
-        ,'kodi'
-        #'tightvnc'
-        #'setpoint'  # logitech
-    )
-
-    InstallChocoApps $htpcApps    
-}
-
-function InstallChocoHomeApps()
-{
-    Enable-RemoteDesktop                            # already enabled on corp machine and it failed when running
-
-    $homeApps = @(
-        'k-litecodecpackfull'
-        ,'itunes'
-        ,'pidgin'
-        ,'handbrake.install'
-        ,'steam'
-        ,'syncback'
-        ,'spotify'
-        ,'wakemeonlan'
-        ,'evernote'
-        ,'calibre'
-        ,'imgburn'
-    )
-
-    InstallChocoApps $homeApps
-}
-
-function InstallChocoUserSettings()
-{
-
-    $userSettings = @(
-        'taskbar-never-combine'
-        ,'explorer-show-all-folders'
-        ,'explorer-expand-to-current-folder'
-    )
-    
-    InstallChocoApps $userSettings
-}
 
 function SetRegionalSettings(){
     #http://stackoverflow.com/questions/4235243/how-to-set-timezone-using-powershell
@@ -234,7 +213,6 @@ function InstallChocoDevApps
         ,'rdcman'
         ,'diffmerge'
         ,'cmake'                     #emgucv
-        ,'audacity'
         ,'fiddler4'
         ,'visualstudiocode'
         ,'nodejs'
@@ -245,7 +223,7 @@ function InstallChocoDevApps
     
     InstallChocoApps $devApps
 
-    choco install git.install -params '"/GitAndUnixToolsOnPath"' --limitoutput
+    choco install git -params '"/GitAndUnixToolsOnPath"'
 }
 
 function InstallVisualStudio()
@@ -314,17 +292,19 @@ ConfigureBaseSettings
 
 Write-BoxstarterMessage "Starting chocolatey installs"
 
-InstallChocoUserSettings    
-InstallChocoCoreApps
+InstallChocoApps $userSettingsApps    
+
+InstallChocoApps $coreApps
 
 if (Test-Path env:\BoxStarterInstallHome)
 {
-    InstallChocoHomeApps
+    Enable-RemoteDesktop                            # already enabled on corp machine and it failed when running
+    InstallChocoApps $homeApps
 }
 
 if (Test-Path env:\BoxStarterInstallHtpc)
 {
-    InstallChocoHtpcApps
+    InstallChocoApps $htpcApps
 }
 
 if ($hasDdrive)
