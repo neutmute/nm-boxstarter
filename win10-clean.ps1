@@ -12,7 +12,16 @@
     cd C:\temp
     git clone https://github.com/W4RH4WK/Debloat-Windows-10.git
     cd Debloat-Windows-10/scripts
+    powershell -f ./block-telemetry.ps1
+    #powershell -f ./disable-services.ps1
+    #powershell -f ./disable-windows-defender.ps1
+    #powershell -f ./experimental_unfuckery.ps1
+    powershell -f ./fix-privacy-settings.ps1
+    #powershell -f ./optimize-user-interface.ps1
+    #powershell -f ./optimize-windows-update.ps1
+    #powershell -f ./remove-default-apps.ps1
     powershell -f ./remove-onedrive.ps1
+
 #>
 
 Function DisableCortana
@@ -90,4 +99,4 @@ DisableCortana
 RemoveDefaultApps
 RemoveBloat
 
-
+OOSU10.exe
