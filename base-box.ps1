@@ -336,6 +336,10 @@ if (Test-Path env:\BoxStarterInstallDev)
     InstallVisualStudio
 }
 
+# Clean installed desktop shortcuts
+$allUsersDesktop = "C:\Users\Public\Desktop"
+Get-ChildItem -Path $allUsersDesktop\*.lnk -Exclude *BoxStarter* | remove-item
+
 # re-enable chocolatey default confirmation behaviour
 #choco feature disable --name=allowGlobalConfirmation
 
