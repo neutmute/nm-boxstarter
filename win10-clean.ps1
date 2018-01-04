@@ -5,9 +5,9 @@
     https://github.com/W4RH4WK/Debloat-Windows-10
 
     #Powershell
-    #choco install git.install /GitAndUnixToolsOnPath  --limitoutput --force
+    choco install git.install /GitAndUnixToolsOnPath  --limitoutput --force
 
-    #Open GitBash
+    #Open Elevated GitBash
     mkdir c:\temp
     cd C:\temp
     git clone https://github.com/W4RH4WK/Debloat-Windows-10.git
@@ -21,7 +21,7 @@
     #powershell -f ./optimize-windows-update.ps1
     #powershell -f ./remove-default-apps.ps1
     powershell -f ./remove-onedrive.ps1
-
+    
 #>
 
 Function DisableCortana
