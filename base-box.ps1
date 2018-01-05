@@ -1,5 +1,4 @@
 <# 
-
 #OPTIONAL
 
     ** Windows 7 ** 
@@ -31,8 +30,6 @@
     Set-ExecutionPolicy Unrestricted
     . { iwr -useb http://boxstarter.org/bootstrapper.ps1 } | iex; get-boxstarter -Force
     Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1
-    Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win10-clean.ps1
-
 #>
 
 $userSettingsApps = @(
@@ -85,8 +82,8 @@ $htpcApps = @(
     ,'steam'
     ,'syncback'
     ,'kodi'
-    #'tightvnc'
-    #'setpoint'  # logitech
+    #'tightvnc'     # hipporemote is dead
+    #'setpoint'     # logitech
 )
 
 $Boxstarter.RebootOk=$true
@@ -128,16 +125,15 @@ function InstallChocoApps($packageArray){
 
 }
 
-
 function SetRegionalSettings(){
     #http://stackoverflow.com/questions/4235243/how-to-set-timezone-using-powershell
     &"$env:windir\system32\tzutil.exe" /s "AUS Eastern Standard Time"
     
-    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sShortDate -Value dd-MMM-yy
-    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sCountry -Value Australia
-    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sShortTime -Value HH:mm
-    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sTimeFormat -Value HH:mm:ss
-    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sLanguage -Value ENA
+    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sShortDate     -Value dd-MMM-yy
+    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sCountry       -Value Australia
+    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sShortTime     -Value HH:mm
+    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sTimeFormat    -Value HH:mm:ss
+    Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sLanguage      -Value ENA
 }
 
 function InstallWindowsUpdate()
@@ -282,6 +278,38 @@ function InstallInternetInformationServices()
     }
 }
 
+function DownloadConfigFiles()
+{
+    Write-Host 'Configuring Notepad++'
+    $notepadShortcutConfigRemote = 'https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/files/notepad%2B%2B/shortcuts.xml'
+    $notepadShortcutConfigLocal = "$($env:AppData)\Notepad++\shortcuts.xml"
+    Invoke-WebRequest -Uri $notepadShortcutConfigRemote -OutFile $notepadShortcutConfigLocal
+}
+
+function CleanDesktopShortcuts()
+{
+    Write-Host "Cleaning desktop of shortcuts"
+    $allUsersDesktop = "C:\Users\Public\Desktop"
+    Get-ChildItem -Path $allUsersDesktop\*.lnk -Exclude *BoxStarter* | remove-item
+}
+
+function ConfigureDdrive()
+{
+    Write-BoxstarterMessage "Configuring D:\"
+    
+    Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
+    
+    $userDataPath = "D:\Data\Documents"
+    $mediaPath = "D:\Media"
+    
+    MoveLibrary -libraryName "My Pictures" -newPath (Join-Path $userDataPath "Pictures")
+    MoveLibrary -libraryName "Personal"    -newPath (Join-Path $userDataPath "Documents")
+    MoveLibrary -libraryName "Desktop"     -newPath (Join-Path $userDataPath "Desktop")
+    MoveLibrary -libraryName "My Video"    -newPath (Join-Path $mediaPath "Videos")
+    MoveLibrary -libraryName "My Music"    -newPath (Join-Path $mediaPath "Music")
+    MoveLibrary -libraryName "Downloads"   -newPath "D:\Downloads"
+}
+
 SetRegionalSettings
 
 # SQL Server requires some KB patches before it will work, so windows update first
@@ -312,34 +340,25 @@ if (Test-Path env:\BoxStarterInstallHtpc)
 
 if ($hasDdrive)
 {
-    Write-BoxstarterMessage "Configuring D:\"
-    
-    Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
-    
-    $userDataPath = "D:\Data\Documents"
-    $mediaPath = "D:\Media"
-    
-    MoveLibrary -libraryName "My Pictures" -newPath (Join-Path $userDataPath "Pictures")
-    MoveLibrary -libraryName "Personal"    -newPath (Join-Path $userDataPath "Documents")
-    MoveLibrary -libraryName "Desktop"     -newPath (Join-Path $userDataPath "Desktop")
-    MoveLibrary -libraryName "My Video"    -newPath (Join-Path $mediaPath "Videos")
-    MoveLibrary -libraryName "My Music"    -newPath (Join-Path $mediaPath "Music")
-    MoveLibrary -libraryName "Downloads"   -newPath "D:\Downloads"
+    ConfigureDdrive
 }
 
 # Put last as the big SQL server / VS2017 tend to fail and kill Boxstarter it seems
 if (Test-Path env:\BoxStarterInstallDev)
 {
-    Write-BoxstarterMessage "Installing dev apps"
+    Write-BoxstarterMessage "Installing Dev Apps"
     InstallChocoDevApps
     InstallSqlServer
     InstallVisualStudio
 }
 
-# Clean installed desktop shortcuts
-$allUsersDesktop = "C:\Users\Public\Desktop"
-Get-ChildItem -Path $allUsersDesktop\*.lnk -Exclude *BoxStarter* | remove-item
+CleanDesktopShortcuts
 
-# re-enable chocolatey default confirmation behaviour
-#choco feature disable --name=allowGlobalConfirmation
+DownloadConfigFiles
+
+# Assume Windows 10
+Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win10-clean.ps1
+
+# Leaving global confirmation enabled
+# choco feature disable --name=allowGlobalConfirmation
 
