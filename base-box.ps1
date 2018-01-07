@@ -50,12 +50,13 @@ $coreApps = @(
     ,'7zip.install'
     ,'lastpass'
     ,'launchy'
-    ,'agentransack'
     ,'wintail'
-    ,'bulkrenameutility'
     ,'fscapture'
-    ,'shutup10'  # Windows 10 privacy. Execute with OOSU10.exe
+    ,'shutup10'                  #Windows 10 privacy. Execute with OOSU10.exe
     ,'veracrypt'        
+    
+    #,'bulkrenameutility'        #works normally but fails under boxstarter
+    #,'agentransack'             #works normally but fails under boxstarter
 )
 
 $homeApps = @(
