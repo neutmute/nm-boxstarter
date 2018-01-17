@@ -209,7 +209,6 @@ function InstallChocoDevApps
         ,'dotpeek'
         ,'nuget.commandline'
         ,'nugetpackageexplorer'
-        ,'sourcetree'
         ,'rdcman'
         ,'diffmerge'
         ,'cmake'                     #emgucv
@@ -224,6 +223,7 @@ function InstallChocoDevApps
     InstallChocoApps $devApps
 
     choco install git -params '"/GitAndUnixToolsOnPath"'
+    choco install sourcetree #do last since not silent
 }
 
 function InstallVisualStudio()
