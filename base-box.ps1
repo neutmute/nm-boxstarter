@@ -350,7 +350,7 @@ if (Test-Path env:\BoxStarterInstallDev)
     Write-BoxstarterMessage "Installing Dev Apps"
     InstallChocoDevApps
     InstallSqlServer
-    InstallVisualStudio
+#    InstallVisualStudio
 }
 
 CleanDesktopShortcuts
