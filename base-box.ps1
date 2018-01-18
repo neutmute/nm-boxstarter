@@ -228,54 +228,59 @@ function InstallChocoDevApps
 
 function InstallVisualStudio()
 {
-    choco install visualstudio2015enterprise --source=https://www.myget.org/F/chocolatey-vs/api/v2 #kennethB is slow pushing to nuget
-    Install-ChocolateyVsixPackage 'PowerShell Tools for Visual Studio 2015' https://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597/file/199313/1/PowerShellTools.14.0.vsix
-    Install-ChocolateyVsixPackage 'Productivity Power Tools 2015' https://visualstudiogallery.msdn.microsoft.com/34ebc6a2-2777-421d-8914-e29c1dfa7f5d/file/169971/1/ProPowerTools.vsix
-    
-    Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Google\Chrome\Application\chrome.exe"
-    Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe"
+#    choco install visualstudio2015enterprise --source=https://www.myget.org/F/chocolatey-vs/api/v2 #kennethB is slow pushing to nuget
+#    Install-ChocolateyVsixPackage 'PowerShell Tools for Visual Studio 2015' https://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597/file/199313/1/PowerShellTools.14.0.vsix
+#    Install-ChocolateyVsixPackage 'Productivity Power Tools 2015' https://visualstudiogallery.msdn.microsoft.com/34ebc6a2-2777-421d-8914-e29c1dfa7f5d/file/169971/1/ProPowerTools.vsix
+#    
+#    Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Google\Chrome\Application\chrome.exe"
+#    Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe"
+
+    choco install visualstudio2017professional --package-parameters "--allWorkloads --includeRecommended --passive --locale en-US"
 }
 
 function InstallInternetInformationServices()
 {
     $windowsFeatures = @(
-        'IIS-WebServerRole'
+        'Windows-Identity-Foundation'
+        ,'Microsoft-Windows-Subsystem-Linux'
+        ,'IIS-WebServerRole'
         ,'IIS-WebServer'
-        ,'IIS-WebServerManagementTools'
-        ,'IIS-ManagementScriptingTools'
-        ,'IIS-IIS6ManagementCompatibility'
-        ,'IIS-Metabase'
-        ,'IIS-ManagementConsole'
-        
         ,'IIS-CommonHttpFeatures'
         ,'IIS-HttpErrors'
         ,'IIS-HttpRedirect'
-        ,'IIS-StaticContent'
-        
         ,'IIS-ApplicationDevelopment'
-        ,'NetFx4Extended-ASPNET45'
         ,'IIS-NetFxExtensibility45'
-        ,'IIS-ISAPIFilter'
-        ,'IIS-ISAPIExtensions'
-        ,'IIS-RequestFiltering'
-        ,'IIS-ASPNET45'
-        ,'IIS-ApplicationInit'
-        
         ,'IIS-HealthAndDiagnostics'
         ,'IIS-HttpLogging'
         ,'IIS-LoggingLibraries'
         ,'IIS-RequestMonitor'
         ,'IIS-HttpTracing'
-        ,'IIS-CustomLogging'
-        
+        ,'IIS-Security'
+        ,'IIS-URLAuthorization'
+        ,'IIS-RequestFiltering'
         ,'IIS-Performance'
         ,'IIS-HttpCompressionDynamic'
-        ,'IIS-HttpCompressionStatic'
+        ,'IIS-WebServerManagementTools'
+        ,'IIS-ManagementScriptingTools'
+        ,'IIS-HostableWebCore'
+        ,'IIS-StaticContent'
+        ,'IIS-DefaultDocument'
+        ,'IIS-WebSockets'
+        ,'IIS-ASPNET'
+        ,'IIS-ServerSideIncludes'
+        ,'IIS-CustomLogging'
         ,'IIS-BasicAuthentication'
+        ,'IIS-HttpCompressionStatic'
+        ,'IIS-ManagementConsole'
+        ,'IIS-ManagementService'
+        ,'IIS-WMICompatibility'
+        ,'IIS-CertProvider'
+        ,'IIS-WindowsAuthentication'
+        ,'IIS-DigestAuthentication'
     )
     
     foreach ($package in $windowsFeatures) {
-	    &choco install $package  --source windowsfeatures
+	    &choco install $package --source windowsfeatures
     }
 }
 
@@ -350,7 +355,8 @@ if (Test-Path env:\BoxStarterInstallDev)
     Write-BoxstarterMessage "Installing Dev Apps"
     InstallChocoDevApps
     InstallSqlServer
-#    InstallVisualStudio
+    InstallInternetInformationServices
+    InstallVisualStudio
 }
 
 CleanDesktopShortcuts
