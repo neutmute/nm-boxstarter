@@ -369,3 +369,5 @@ Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmut
 # Leaving global confirmation enabled
 # choco feature disable --name=allowGlobalConfirmation
 
+Write-Host "Follow extra optional cleanup steps in win10-clean.ps1"
+start https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win10-clean.ps1
