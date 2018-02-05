@@ -8,6 +8,15 @@ function InstallChocoApps($packageArray){
 
 }
 
+
+function ConfigureNotepadPlusPlus()
+{
+    Write-Host 'Configuring Notepad++'
+    $notepadShortcutConfigRemote = 'https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/files/notepad%2B%2B/shortcuts.xml'
+    $notepadShortcutConfigLocal = "$($env:AppData)\Notepad++\shortcuts.xml"
+    Invoke-WebRequest -Uri $notepadShortcutConfigRemote -OutFile $notepadShortcutConfigLocal
+}
+
 $serverApps = @(
     'taskbar-never-combine'
     ,'explorer-show-all-folders'
@@ -22,3 +31,5 @@ Set-ExecutionPolicy Bypass -Scope Process -Force; iex ((New-Object System.Net.We
 
 # Install Apps
 InstallChocoApps $serverApps
+
+ConfigureNotepadPlusPlus
