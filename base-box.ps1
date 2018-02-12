@@ -29,7 +29,8 @@
 #START
     Set-ExecutionPolicy Unrestricted
     . { iwr -useb http://boxstarter.org/bootstrapper.ps1 } | iex; get-boxstarter -Force
-    Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1
+    $cred=Get-Credential
+    Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1 -Credential $cred
 #>
 
 $userSettingsApps = @(
