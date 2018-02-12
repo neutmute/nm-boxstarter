@@ -219,6 +219,7 @@ function InstallChocoDevApps
         ,'checksum'
         ,'gitextensions'
         ,'atom'
+		,'ilspy'
     )
     
     InstallChocoApps $devApps
