@@ -209,7 +209,7 @@ function InstallChocoDevApps
         ,'dotpeek'
         ,'nuget.commandline'
         ,'nugetpackageexplorer'
-        ,'rdcman'
+        ,'rdcman'					# remote desktop connection manager
         ,'diffmerge'
         ,'cmake'                     #emgucv
         ,'fiddler4'
