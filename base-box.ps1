@@ -122,7 +122,7 @@ function MoveLibrary {
 function InstallChocoApps($packageArray){
 
     foreach ($package in $packageArray) {
-	    &choco install $package --limitoutput
+        &choco install $package --limitoutput
     }
 
 }
@@ -210,7 +210,7 @@ function InstallChocoDevApps
         ,'dotpeek'
         ,'nuget.commandline'
         ,'nugetpackageexplorer'
-        ,'rdcman'					# remote desktop connection manager
+        ,'rdcman'                   # remote desktop connection manager
         ,'diffmerge'
         ,'cmake'                     #emgucv
         ,'fiddler4'
@@ -219,8 +219,9 @@ function InstallChocoDevApps
         ,'checksum'
         ,'gitextensions'
         ,'atom'
-		,'ilspy'
-		,'vswhere'
+        ,'ilspy'
+        ,'poshgit'
+        ,'vswhere'
     )
     
     InstallChocoApps $devApps
@@ -283,7 +284,7 @@ function InstallInternetInformationServices()
     )
     
     foreach ($package in $windowsFeatures) {
-	    &choco install $package --source windowsfeatures
+        &choco install $package --source windowsfeatures
     }
 }
 
