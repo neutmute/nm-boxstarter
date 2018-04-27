@@ -220,6 +220,7 @@ function InstallChocoDevApps
         ,'gitextensions'
         ,'atom'
 		,'ilspy'
+		,'vswhere'
     )
     
     InstallChocoApps $devApps
