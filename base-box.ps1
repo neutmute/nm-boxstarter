@@ -194,7 +194,6 @@ function InstallSqlServer()
 function InstallChocoDevApps
 {
     #choco install jdk7                  --limitoutput  #neo4j - but can use docker now
-    #choco install markdownpad2          --limitoutput   #replaced with atom
 
     $devApps = @(
         'nsis.install'
@@ -218,7 +217,6 @@ function InstallChocoDevApps
         ,'nodejs'
         ,'checksum'
         ,'gitextensions'
-        ,'atom'
         ,'ilspy'
         ,'poshgit'
         ,'vswhere'
