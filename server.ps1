@@ -1,4 +1,8 @@
-# For a spun up server
+
+<#
+For a spun up server
+Also see https://gist.github.com/alirobe/1e9fb1fd8eefd72ce5cd372459a88b59
+#>
 
 function InstallChocoApps($packageArray){
 
