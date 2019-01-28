@@ -1,10 +1,6 @@
 <# 
 #OPTIONAL
 
-    ** Windows 7 ** 
-    Should upgrade to WMF 5 first for reduced errors
-    https://www.microsoft.com/en-us/download/details.aspx?id=50395
-
     # If Dev Machine
     [Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Machine") # for reboots
     [Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Process") # for right now
@@ -63,7 +59,6 @@ $coreApps = @(
 $homeApps = @(
     'k-litecodecpackfull'
     ,'itunes'
-    ,'pidgin'
     ,'handbrake.install'
     ,'steam'
     ,'syncback'
@@ -74,6 +69,7 @@ $homeApps = @(
     ,'imgburn'
     ,'winamp'        
     ,'audacity'
+    ,'alldup'                   # freeware tool for searching and removing file duplicates on your computer
 )
 
 $htpcApps = @(
