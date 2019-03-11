@@ -51,7 +51,8 @@ $coreApps = @(
     ,'fscapture'
     ,'shutup10'                  #Windows 10 privacy. Execute with OOSU10.exe
     ,'veracrypt'        
-    
+    ,'powershellhere'
+    ,'powershellhere-elevated'
     #,'bulkrenameutility'        #works normally but fails under boxstarter
     #,'agentransack'             #works normally but fails under boxstarter
 )
