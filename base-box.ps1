@@ -234,7 +234,7 @@ function InstallVisualStudio()
 #    Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Google\Chrome\Application\chrome.exe"
 #    Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe"
 
-    choco install visualstudio2017professional --package-parameters "--allWorkloads --includeRecommended --passive --locale en-US"
+    choco install visualstudio2019community --package-parameters "--allWorkloads --includeRecommended --passive --locale en-US"
 }
 
 function InstallInternetInformationServices()
