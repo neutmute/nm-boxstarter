@@ -39,7 +39,7 @@ $coreApps = @(
     'chocolatey'
     ,'firefox'
     ,'googlechrome'
-    ,'flashplayerplugin'
+    #,'flashplayerplugin'
     ,'notepadplusplus.install'
     ,'paint.net'
     ,'irfanview'
@@ -194,7 +194,7 @@ function InstallChocoDevApps
 
     $devApps = @(
         'nsis.install'
-        ,'commandwindowhere'
+        #,'commandwindowhere'
         ,'filezilla'
         ,'putty'
         ,'winscp'
