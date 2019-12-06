@@ -48,7 +48,6 @@ $coreApps = @(
     ,'lastpass'
     ,'launchy'
     ,'wintail'
-    ,'fscapture'
     ,'shutup10'                  #Windows 10 privacy. Execute with OOSU10.exe
     ,'veracrypt'        
     ,'powershellhere'
@@ -59,6 +58,7 @@ $coreApps = @(
 
 $homeApps = @(
     'k-litecodecpackfull'
+    ,'fscapture'
     ,'itunes'
     ,'handbrake.install'
     ,'steam'
@@ -81,8 +81,6 @@ $htpcApps = @(
     ,'steam'
     ,'syncback'
     ,'kodi'
-    #'tightvnc'     # hipporemote is dead
-    #'setpoint'     # logitech
 )
 
 $Boxstarter.RebootOk=$true
@@ -335,6 +333,8 @@ InstallChocoApps $coreApps
 if (Test-Path env:\BoxStarterInstallHome)
 {
     Enable-RemoteDesktop                            # already enabled on corp machine and it failed when running
+    Disable-BingSearch
+    Disable-GameBarTips
     InstallChocoApps $homeApps
 }
 
@@ -369,4 +369,4 @@ Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmut
 # choco feature disable --name=allowGlobalConfirmation
 
 Write-Host "Follow extra optional cleanup steps in win10-clean.ps1"
-start https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win10-clean.ps1
+Start-Process https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win10-clean.ps1
