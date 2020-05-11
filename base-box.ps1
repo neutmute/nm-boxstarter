@@ -61,25 +61,27 @@ $homeApps = @(
     ,'fscapture'
     ,'itunes'
     ,'handbrake.install'
-    ,'steam'
-    ,'syncback'
+#    ,'steam'					# want this to go to d:
+    ,'syncbackfree'
     ,'spotify'
     ,'wakemeonlan'
     ,'evernote'
     ,'calibre'
-    ,'imgburn'
+   # ,'imgburn'
     ,'winamp'        
     ,'audacity'
     ,'alldup'                   # freeware tool for searching and removing file duplicates on your computer
+	,'beebeep'
+	,'sendtokindle'
 )
 
 $htpcApps = @(
     'k-litecodecpackfull'
-    ,'mssql2014express-defaultinstance'
-    ,'sql-server-management-studio'
-    ,'plexmediaserver'
+   # ,'mssql2014express-defaultinstance'
+   # ,'sql-server-management-studio'
+   # ,'plexmediaserver'
     ,'steam'
-    ,'syncback'
+    ,'syncbackfree'
     ,'kodi'
 )
 
@@ -199,14 +201,15 @@ function InstallChocoDevApps
         ,'wireshark'
         ,'nmap'
         ,'autohotkey.install'
-        ,'console2'
+        #,'console2'				
+		,'microsoft-windows-terminal'
         ,'virtualbox'
         ,'dotpeek'
         ,'nuget.commandline'
         ,'nugetpackageexplorer'
-        ,'rdcman'                   # remote desktop connection manager
+        #,'rdcman'                   # remote desktop connection manager. deprecated
         ,'diffmerge'
-        ,'cmake'                     #emgucv
+        #,'cmake'                     #emgucv
         ,'fiddler4'
         ,'visualstudiocode'
         ,'nodejs'
@@ -215,6 +218,7 @@ function InstallChocoDevApps
         ,'ilspy'
         ,'poshgit'
         ,'vswhere'
+        ,'vscode'
     )
     
     InstallChocoApps $devApps
