@@ -52,6 +52,7 @@ $coreApps = @(
     ,'veracrypt'        
     ,'powershellhere'
     ,'powershellhere-elevated'
+	,'windirstat'
     #,'bulkrenameutility'        #works normally but fails under boxstarter
     #,'agentransack'             #works normally but fails under boxstarter
 )
