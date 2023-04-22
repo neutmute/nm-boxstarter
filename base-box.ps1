@@ -101,7 +101,10 @@ function ConfigureBaseSettings()
     Set-CornerNavigationOptions -EnableUsePowerShellOnWinX
     Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -DisableShowProtectedOSFiles -EnableShowFileExtensions -EnableShowFullPathInTitleBar
     Set-BoxstarterTaskbarOptions -Combine Never
-    
+    Disable-BingSearch
+
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device" -Name "DevicePasswordLessBuildVersion" -Value 0 # Run 'netplz' to then allow automatic logon
+        
     Start-Process 'powercfg.exe' -Verb runAs -ArgumentList '/h off'     # Disable hibernate
 }
 
