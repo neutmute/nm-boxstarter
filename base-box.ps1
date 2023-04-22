@@ -28,6 +28,7 @@
     $cred=Get-Credential
     Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1 -Credential $cred
 #>
+Import-Module Boxstarter.Chocolatey
 
 $userSettingsApps = @(
     'taskbar-never-combine'
@@ -45,7 +46,6 @@ $coreApps = @(
     ,'irfanview'
     ,'irfanviewplugins'
     ,'7zip.install'
-    ,'lastpass'
     ,'launchy'
     ,'wintail'
     ,'shutup10'                  #Windows 10 privacy. Execute with OOSU10.exe
@@ -100,7 +100,7 @@ function ConfigureBaseSettings()
     Set-Volume -DriveLetter $env:SystemDrive[0] -NewFileSystemLabel "System"
     Set-CornerNavigationOptions -EnableUsePowerShellOnWinX
     Set-WindowsExplorerOptions -EnableShowHiddenFilesFoldersDrives -DisableShowProtectedOSFiles -EnableShowFileExtensions -EnableShowFullPathInTitleBar
-    Set-TaskbarOptions -Combine Never
+    Set-BoxstarterTaskbarOptions -Combine Never
     
     Start-Process 'powercfg.exe' -Verb runAs -ArgumentList '/h off'     # Disable hibernate
 }
