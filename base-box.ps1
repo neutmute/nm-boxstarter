@@ -40,7 +40,6 @@ $coreApps = @(
     'chocolatey'
     ,'firefox'
     ,'googlechrome'
-    #,'flashplayerplugin'
     ,'notepadplusplus.install'
     ,'paint.net'
     ,'irfanview'
@@ -48,24 +47,23 @@ $coreApps = @(
     ,'7zip.install'
     ,'launchy'
     ,'wintail'
-    ,'shutup10'                  #Windows 10 privacy. Execute with OOSU10.exe
+    ,'shutup10'                  #Windows privacy. Execute with OOSU10.exe
     ,'veracrypt'        
     ,'powershellhere'
     ,'powershellhere-elevated'
 	,'windirstat'
+    ,'wakemeonlan'
     #,'bulkrenameutility'        #works normally but fails under boxstarter
     #,'agentransack'             #works normally but fails under boxstarter
 )
 
 $homeApps = @(
-    'k-litecodecpackfull'
     ,'fscapture'
-    ,'itunes'
-    ,'handbrake.install'
+#    ,'itunes'
+#    ,'handbrake.install'
 #    ,'steam'					# want this to go to d:
     ,'syncbackfree'
     ,'spotify'
-    ,'wakemeonlan'
     ,'evernote'
     ,'calibre'
    # ,'imgburn'
@@ -77,7 +75,7 @@ $homeApps = @(
 )
 
 $htpcApps = @(
-    'k-litecodecpackfull'
+   # 'k-litecodecpackfull'
    # ,'mssql2014express-defaultinstance'
    # ,'sql-server-management-studio'
    # ,'plexmediaserver'
@@ -197,9 +195,9 @@ function InstallChocoDevApps
     #choco install jdk7                  --limitoutput  #neo4j - but can use docker now
 
     $devApps = @(
-        'nsis.install'
+        #'nsis.install'
         #,'commandwindowhere'
-        ,'filezilla'
+        #,'filezilla'
         ,'putty'
         ,'winscp'
         ,'wireshark'
@@ -208,19 +206,19 @@ function InstallChocoDevApps
         #,'console2'				
 		,'microsoft-windows-terminal'
         ,'virtualbox'
-        ,'dotpeek'
+        #,'dotpeek'
         ,'nuget.commandline'
         ,'nugetpackageexplorer'
         #,'rdcman'                   # remote desktop connection manager. deprecated
         ,'diffmerge'
         #,'cmake'                     #emgucv
-        ,'fiddler4'
+        #,'fiddler4'
         ,'visualstudiocode'
-        ,'nodejs'
+        #,'nodejs'
         ,'checksum'
         ,'gitextensions'
         ,'ilspy'
-        ,'poshgit'
+        #,'poshgit'
         ,'vswhere'
         ,'vscode'
     )
@@ -233,14 +231,7 @@ function InstallChocoDevApps
 
 function InstallVisualStudio()
 {
-#    choco install visualstudio2015enterprise --source=https://www.myget.org/F/chocolatey-vs/api/v2 #kennethB is slow pushing to nuget
-#    Install-ChocolateyVsixPackage 'PowerShell Tools for Visual Studio 2015' https://visualstudiogallery.msdn.microsoft.com/c9eb3ba8-0c59-4944-9a62-6eee37294597/file/199313/1/PowerShellTools.14.0.vsix
-#    Install-ChocolateyVsixPackage 'Productivity Power Tools 2015' https://visualstudiogallery.msdn.microsoft.com/34ebc6a2-2777-421d-8914-e29c1dfa7f5d/file/169971/1/ProPowerTools.vsix
-#    
-#    Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Google\Chrome\Application\chrome.exe"
-#    Install-ChocolateyPinnedTaskBarItem "$($Boxstarter.programFiles86)\Microsoft Visual Studio 14.0\Common7\IDE\devenv.exe"
-
-    choco install visualstudio2019community --package-parameters "--allWorkloads --includeRecommended --passive --locale en-US"
+    choco install visualstudio2022community --package-parameters "--allWorkloads --includeRecommended --passive --locale en-US"
 }
 
 function InstallInternetInformationServices()
