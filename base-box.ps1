@@ -192,40 +192,32 @@ function InstallSqlServer()
 
 function InstallChocoDevApps
 {
-    #choco install jdk7                  --limitoutput  #neo4j - but can use docker now
-
     $devApps = @(
         #'nsis.install'
         #,'commandwindowhere'
         #,'filezilla'
         ,'putty'
         ,'winscp'
-        ,'wireshark'
+        #,'wireshark'
         ,'nmap'
-        ,'autohotkey.install'
-        #,'console2'				
+        ,'autohotkey.install'		
 		,'microsoft-windows-terminal'
         ,'virtualbox'
-        #,'dotpeek'
-        ,'nuget.commandline'
-        ,'nugetpackageexplorer'
-        #,'rdcman'                   # remote desktop connection manager. deprecated
+        #,'nuget.commandline'
+        #,'nugetpackageexplorer'
+        ,'rdcman'                   # remote desktop connection manager 
         ,'diffmerge'
-        #,'cmake'                     #emgucv
-        #,'fiddler4'
-        ,'visualstudiocode'
-        #,'nodejs'
         ,'checksum'
         ,'gitextensions'
         ,'ilspy'
-        #,'poshgit'
         ,'vswhere'
         ,'vscode'
     )
+
+    choco install git.install --params "'/GitAndUnixToolsOnPath /WindowsTerminal'"
     
     InstallChocoApps $devApps
 
-    choco install git -params '"/GitAndUnixToolsOnPath"'
     choco install sourcetree #do last since not silent
 }
 
@@ -352,9 +344,9 @@ if (Test-Path env:\BoxStarterInstallDev)
 {
     Write-BoxstarterMessage "Installing Dev Apps"
     InstallChocoDevApps
-    InstallSqlServer
+    #InstallSqlServer
     InstallInternetInformationServices
-    InstallVisualStudio
+    #InstallVisualStudio
 }
 
 CleanDesktopShortcuts
