@@ -211,6 +211,7 @@ function InstallChocoDevApps
         ,'gitextensions'
         ,'ilspy'
 		,'slack'
+		,'sql-server-management-studio'
         ,'vswhere'
         ,'vscode'
     )
