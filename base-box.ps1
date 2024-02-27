@@ -210,10 +210,12 @@ function InstallChocoDevApps
         ,'checksum'
         ,'gitextensions'
         ,'ilspy'
+        ,'openssl'
 		,'slack'
 		,'sql-server-management-studio'
         ,'vswhere'
         ,'vscode'
+
     )
 
     choco install git.install --params "'/GitAndUnixToolsOnPath /WindowsTerminal'"
