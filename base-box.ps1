@@ -223,6 +223,10 @@ function InstallChocoDevApps
     InstallChocoApps $devApps
 
     choco install sourcetree #do last since not silent
+	
+	# AWS Powershell tools
+	Install-Module -Name AWS.Tools.Common
+	Install-Module -Name AWS.Tools.EC2
 }
 
 function InstallVisualStudio()
