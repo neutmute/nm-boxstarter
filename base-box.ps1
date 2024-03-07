@@ -215,6 +215,7 @@ function InstallChocoDevApps
 		,'sql-server-management-studio'
         ,'vswhere'
         ,'vscode'
+        ,'zoom'
 
     )
 
