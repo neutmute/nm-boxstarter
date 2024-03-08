@@ -370,3 +370,4 @@ Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmut
 
 Write-Host "Follow extra optional cleanup steps in win10-clean.ps1"
 Start-Process https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win10-clean.ps1
+Start-Process https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win11-clean.ps1
