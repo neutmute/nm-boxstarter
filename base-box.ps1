@@ -213,6 +213,7 @@ function InstallChocoDevApps
         ,'openssl'
 		,'slack'
 		,'sql-server-management-studio'
+		,'urlrewrite'				# Used for WASM / Blazor apps
         ,'vswhere'
         ,'vscode'
         ,'zoom'
