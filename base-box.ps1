@@ -213,7 +213,6 @@ function InstallChocoDevApps
         ,'openssl'
 		,'slack'
 		,'sql-server-management-studio'
-		,'urlrewrite'				# Used for WASM / Blazor apps
         ,'vswhere'
         ,'vscode'
         ,'zoom'
@@ -280,6 +279,8 @@ function InstallInternetInformationServices()
     foreach ($package in $windowsFeatures) {
         &choco install $package --source windowsfeatures
     }
+	
+	choco install -y urlrewrite		# Used for WASM / Blazor apps
 }
 
 function DownloadConfigFiles()
