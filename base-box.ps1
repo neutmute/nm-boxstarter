@@ -199,22 +199,22 @@ function InstallChocoDevApps
         #,'virtualbox'  # if VM we want this manually 
         #,'nugetpackageexplorer'
         #,'wireshark'
-        'putty'
-        ,'winscp'
-        ,'nmap'
-        ,'autohotkey.install'		
-		,'microsoft-windows-terminal'
-        ,'nuget.commandline'
-        ,'rdcman'                   # remote desktop connection manager 
-        ,'diffmerge'
+        'autohotkey'
         ,'checksum'
+        ,'diffmerge'
         ,'gitextensions'
         ,'ilspy'
+        ,'microsoft-windows-terminal'
+        ,'nmap'
+        ,'nuget.commandline'
         ,'openssl'
-		,'slack'
-		,'sql-server-management-studio'
-        ,'vswhere'
+        ,'putty'
+        ,'rdcman'                       # remote desktop connection manager 
+        ,'slack'
+        ,'sql-server-management-studio'
         ,'vscode'
+        ,'vswhere'
+        ,'winscp'
         ,'zoom'
 
     )
