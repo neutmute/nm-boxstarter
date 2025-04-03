@@ -64,7 +64,7 @@ $homeApps = @(
 #    ,'steam'					# want this to go to d:
     ,'syncbackfree'
     ,'spotify'
-    ,'evernote'
+    ,'joplin'
     ,'calibre'
    # ,'imgburn'
     ,'winamp'        
