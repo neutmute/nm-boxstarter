@@ -45,7 +45,7 @@ $coreApps = @(
     ,'irfanview'
     ,'irfanviewplugins'
     ,'7zip.install'
-    ,'launchy'
+    #,'launchy'
     ,'wintail'
     ,'shutup10'                  #Windows privacy. Execute with OOSU10.exe
     ,'veracrypt'        
