@@ -38,6 +38,7 @@ $userSettingsApps = @(
 
 $coreApps = @(
     'chocolatey'
+	,'bitwarden'
     ,'firefox'
     ,'googlechrome'
     ,'notepadplusplus.install'
@@ -204,7 +205,6 @@ function InstallChocoDevApps
         ,'diffmerge'
         ,'gitextensions'
         ,'ilspy'
-        ,'microsoft-windows-terminal'
         ,'nmap'
         ,'nuget.commandline'
         ,'openssl'
