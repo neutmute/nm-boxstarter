@@ -45,6 +45,7 @@ $coreApps = @(
     ,'paint.net'
     ,'irfanview'
     ,'irfanviewplugins'
+	,'fscapture'
     ,'7zip.install'
     #,'launchy'
     ,'wintail'
@@ -59,7 +60,7 @@ $coreApps = @(
 )
 
 $homeApps = @(
-    ,'fscapture'
+    
 #    ,'itunes'
 #    ,'handbrake.install'
 #    ,'steam'					# want this to go to d:
@@ -73,6 +74,7 @@ $homeApps = @(
     ,'alldup'                   # freeware tool for searching and removing file duplicates on your computer
 	,'beebeep'
 	,'sendtokindle'
+	,'signal'
 )
 
 $htpcApps = @(
