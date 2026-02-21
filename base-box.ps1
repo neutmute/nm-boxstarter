@@ -3,16 +3,7 @@
 
     # If Dev Machine
     [Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Machine") # for reboots
-    [Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Process") # for right now
-    
-    [Environment]::SetEnvironmentVariable("choco:sqlserver2008:isoImage", "D:\Downloads\en_sql_server_2008_r2_developer_x86_x64_ia64_dvd_522665.iso", "Machine") # for reboots
-    [Environment]::SetEnvironmentVariable("choco:sqlserver2008:isoImage", "D:\Downloads\en_sql_server_2008_r2_developer_x86_x64_ia64_dvd_522665.iso", "Process") # for right now
-    
-    [Environment]::SetEnvironmentVariable("choco:sqlserver2012:isoImage", "D:\Downloads\en_sql_server_2012_developer_edition_with_service_pack_3_x64_dvd_7286643.iso", "Machine") # for reboots
-    [Environment]::SetEnvironmentVariable("choco:sqlserver2012:isoImage", "D:\Downloads\en_sql_server_2012_developer_edition_with_service_pack_3_x64_dvd_7286643.iso", "Process") # for right now
-    
-    [Environment]::SetEnvironmentVariable("choco:sqlserver2016:isoImage", "D:\Downloads\en_sql_server_2016_rc_2_x64_dvd_8509698.iso", "Machine") # for reboots
-    [Environment]::SetEnvironmentVariable("choco:sqlserver2016:isoImage", "D:\Downloads\en_sql_server_2016_rc_2_x64_dvd_8509698.iso", "Process") # for right now
+    [Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Process") # for right n
     
     # If Home Machine
     [Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Machine") # for reboots
