@@ -38,8 +38,6 @@ $coreApps = @(
     ,'irfanviewplugins'
 	,'fscapture'
     ,'7zip.install'
-    #,'launchy'
-    ,'wintail'
     ,'shutup10'                  #Windows privacy. Execute with OOSU10.exe
     ,'veracrypt'        
     ,'powershellhere'
@@ -59,7 +57,6 @@ $homeApps = @(
     ,'spotify'
     ,'joplin'
     ,'calibre'
-   # ,'imgburn'
     ,'winamp'        
     ,'audacity'
     ,'alldup'                   # freeware tool for searching and removing file duplicates on your computer
@@ -197,7 +194,7 @@ function InstallChocoDevApps
         ,'checksum'
         ,'diffmerge'
         ,'gitextensions'
-        ,'ilspy'
+        #,'ilspy'       # unused
         ,'nmap'
         ,'nuget.commandline'
         ,'openssl'
@@ -208,7 +205,7 @@ function InstallChocoDevApps
         ,'vscode'
         ,'vswhere'
         ,'winscp'
-        ,'zoom'
+        ,'wintail'
 
     )
 
