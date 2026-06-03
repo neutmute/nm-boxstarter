@@ -195,6 +195,7 @@ function InstallChocoDevApps
         ,'diffmerge'
         ,'gitextensions'
         #,'ilspy'       # unused
+        ,'sqlitebrowser'
         ,'nmap'
         ,'nuget.commandline'
         ,'openssl'
