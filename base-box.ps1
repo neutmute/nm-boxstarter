@@ -130,9 +130,23 @@ function SetRegionalSettings(){
 
 function InstallWindowsUpdate()
 {
+    Write-BoxstarterMessage "Windows update..."
+
     Enable-MicrosoftUpdate
     Install-WindowsUpdate -AcceptEula
     if (Test-PendingReboot) { Invoke-Reboot }
+}
+
+function InstallGraphicsDrivers()
+{   
+    $nvidiaGpu = Get-CimInstance Win32_VideoController | Where-Object { $_.Name -like '*NVIDIA*' }
+    if ($nvidiaGpu) {
+        Write-BoxstarterMessage "NVIDIA GPU detected ($($nvidiaGpu.Name)), installing display driver..."
+        choco install nvidia-display-driver
+    }
+    else {
+        Write-BoxstarterMessage "NVIDIA GPU not found, not installing drivers"
+    }
 }
 
 function InstallSqlServer()
@@ -309,8 +323,9 @@ function ConfigureDdrive()
 SetRegionalSettings
 
 # SQL Server requires some KB patches before it will work, so windows update first
-Write-BoxstarterMessage "Windows update..."
 InstallWindowsUpdate
+
+InstallGraphicsDrivers
 
 # disable chocolatey default confirmation behaviour (no need for --yes)
 choco feature enable --name=allowGlobalConfirmation
