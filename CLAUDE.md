@@ -73,8 +73,9 @@ All Chocolatey installs go through `Install-ChocoPackage`, which skips packages 
 
 ## Key Functions in base-box.ps1
 
+- **Get-Concerns()**: Prompts for each concern, persists/loads `neutmute-boxstarter.json`, returns the concern hashtable
 - **ConfigureBaseSettings()**: Windows system settings, power options, Explorer options
-- **InstallChocoApps($packageArray)**: Generic Chocolatey package installer
+- **Install-ChocoPackage($packageName) / Install-ChocoPackages($packageArray)**: Idempotent Chocolatey installer; skips packages already present in `$ChocolateyInstall\lib`
 - **InstallVisualStudio()**: VS 2026 Community install — gated by the `visualStudio` concern
 - **InstallInternetInformationServices()**: Extensive IIS feature installation — gated by the `iis` concern
 - **ConfigureDdrive()**: D: drive setup and Windows folder relocation
@@ -104,7 +105,6 @@ When D: drive exists and is not a CD-ROM:
 - D:\Data\Documents\ - User documents, pictures, desktop
 - D:\Media\ - Videos and music
 - D:\Downloads - Downloads folder
-- D:\Data\Sql - SQL Server data directory (if installed)
 
 ## Important Notes
 
@@ -114,4 +114,4 @@ When D: drive exists and is not a CD-ROM:
 - Desktop shortcuts are automatically cleaned up at the end
 - Notepad++ configuration is downloaded from this GitHub repo
 - The scripts require Administrator/elevated privileges
-- Windows Update is run early in the process to ensure SQL Server prerequisites are met
+- Windows Update is run early in the process to ensure prerequisites are met
