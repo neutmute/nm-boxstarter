@@ -12,15 +12,13 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
 
 - **base-box.ps1**: Main orchestration script that handles the complete machine setup
   - Entry point for most installations
-  - Supports multiple install profiles via environment variables
-  - Chains to win10-clean.ps1 via Boxstarter at the end, then opens both win10 and win11 clean scripts in the browser for manual reference
+  - Interactively prompts for "concerns" (install areas) at runtime and persists answers to `neutmute-boxstarter.json` in the user's Documents folder
+  - Idempotent and safe to run multiple times; skips already-installed Chocolatey packages
+  - Applies Windows 11 cleanup tweaks inline at the end (classic context menu, remove OneDrive, block "Edit in Notepad", Chris Titus tweaks)
 
 - **bootstrap.ps1**: Automated entry point for vagrant/unattended installations
   - Downloads and installs Boxstarter
   - Invokes base-box.ps1 with hardcoded credentials
-
-- **win10-clean.ps1**: Boxstarter cleanup script for Windows 10
-  - Removes bloatware apps, disables Cortana/telemetry, configures privacy/registry tweaks
 
 - **win11-clean.ps1**: Raw PowerShell cleanup for Windows 11 (no Boxstarter dependency)
   - Uses `reg`, `winget`, and direct registry edits; runs Christitus tweaks via `iwr`
@@ -45,35 +43,40 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
 - **files/notepad++/shortcuts.xml**: Downloaded during setup by `DownloadConfigFiles()` to `%AppData%\Notepad++\`
 - **files/documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1**: PowerShell profile
 
-## Install Profiles
+## Concerns
 
-base-box.ps1 supports multiple install profiles controlled by environment variables:
+base-box.ps1 prompts interactively for each "concern" (install area) at runtime. Answers are saved to `neutmute-boxstarter.json` in the user's Documents folder and shown as hints on subsequent runs. The prompt default is No; type `y` to opt in.
 
-- **BoxStarterInstallDev**: Development machine with Visual Studio, SQL Server, IIS, dev tools
-- **BoxStarterInstallHome**: Home machine with media apps, utilities
-- **BoxStarterInstallHtpc**: HTPC profile with Kodi, Steam, media tools
+Available concerns:
 
-Set these in both "Machine" and "Process" scopes before running to enable the profile.
+- **core**: Essential utilities for all machines (browsers, Notepad++, 7zip, etc.)
+- **baseSettings**: Windows Explorer/taskbar tweaks, power options, execution policy
+- **regionalSettings**: Australian timezone and date/time formats
+- **ddrive**: D: drive setup and Windows known-folder relocation
+- **home**: Home-specific apps (Spotify, Joplin, Calibre, etc.) plus Remote Desktop
+- **htpc**: Media center apps (Kodi, Steam)
+- **dev**: Developer tools (Git, VS Code, SSMS, Slack, etc.)
+- **iis**: IIS Windows features and URL Rewrite (independent of dev)
+- **visualStudio**: Visual Studio 2026 Community
 
 ## Application Organization
 
 Apps are organized into logical arrays in base-box.ps1:
 
-- **userSettingsApps**: Windows Explorer/taskbar tweaks (top-level array)
-- **coreApps**: Essential utilities for all machines (browsers, Notepad++, 7zip, etc.) (top-level array)
-- **homeApps**: Home-specific apps (Spotify, Joplin, Calibre, etc.) (top-level array)
-- **htpcApps**: Media center apps (Kodi, Steam) (top-level array)
-- **devApps**: Developer tools (Git, VS Code, SSMS, Slack, etc.) — defined *inside* `InstallChocoDevApps()`, not at top level
+- **userSettingsApps**: Windows Explorer/taskbar tweaks (top-level array, always installed)
+- **coreApps**: Essential utilities (browsers, Notepad++, 7zip, etc.) (top-level array, `core` concern)
+- **homeApps**: Home-specific apps (Spotify, Joplin, Calibre, etc.) (top-level array, `home` concern)
+- **htpcApps**: Media center apps (Kodi, Steam) (top-level array, `htpc` concern)
+- **devApps**: Developer tools (Git, VS Code, SSMS, Slack, etc.) — defined *inside* `InstallChocoDevApps()`, not at top level (`dev` concern)
+
+All Chocolatey installs go through `Install-ChocoPackage`, which skips packages already present in `$ChocolateyInstall\lib` for idempotency.
 
 ## Key Functions in base-box.ps1
 
 - **ConfigureBaseSettings()**: Windows system settings, power options, Explorer options
 - **InstallChocoApps($packageArray)**: Generic Chocolatey package installer
-- **InstallSqlServer()**: SQL Server installation from ISO (2008/2012/2016) — defined but commented out in main flow
-  - Uses custom MyGet package source: https://www.myget.org/F/nm-chocolatey-packs/api/v2
-  - Pass ISO path via environment variable: `choco:sqlserver2016:isoImage`
-- **InstallVisualStudio()**: VS 2022 Community install — defined but commented out in main flow
-- **InstallInternetInformationServices()**: Extensive IIS feature installation
+- **InstallVisualStudio()**: VS 2026 Community install — gated by the `visualStudio` concern
+- **InstallInternetInformationServices()**: Extensive IIS feature installation — gated by the `iis` concern
 - **ConfigureDdrive()**: D: drive setup and Windows folder relocation
 - **SetRegionalSettings()**: Hardcoded to Australia timezone and date formats
 
@@ -106,6 +109,7 @@ When D: drive exists and is not a CD-ROM:
 ## Important Notes
 
 - Boxstarter handles automatic reboots during installation
+- Install choices ("concerns") are prompted once and persisted to `neutmute-boxstarter.json` in Documents; the script is idempotent across re-runs
 - Chocolatey global confirmation is enabled (no need for --yes flag)
 - Desktop shortcuts are automatically cleaned up at the end
 - Notepad++ configuration is downloaded from this GitHub repo
