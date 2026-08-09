@@ -19,7 +19,7 @@ Nine concerns, all user-selectable:
 | `baseSettings` | Explorer options, execution policy, power (hibernate off), taskbar combine, Bing search off, passwordless logon registry key |
 | `regionalSettings` | AU Eastern timezone, dd-MMM-yy date format, HH:mm:ss time format |
 | `ddrive` | Label D: as "Data", relocate Documents, Pictures, Desktop, Videos, Music, Downloads to D: |
-| `home` | Syncback, Spotify, Joplin, Calibre, Winamp, Audacity, AllDup, BeeBEEP, SendToKindle, Signal |
+| `home` | Enable Remote Desktop, disable Game Bar tips, Syncback, Spotify, Joplin, Calibre, Winamp, Audacity, AllDup, BeeBEEP, SendToKindle, Signal |
 | `dev` | Git, VS Code, Slack, SSMS, Putty, RDCMan, WinSCP, DiffMerge, GitExtensions, Nmap, OpenSSL, SQLiteBrowser, Checksum, AutoHotKey, Wintail, NuGet CLI, SourceTree, AWS PowerShell tools |
 | `iis` | IIS Windows features (full set), URL Rewrite module |
 | `visualStudio` | Visual Studio 2026 Community (all workloads, recommended, passive) |
@@ -100,6 +100,29 @@ Absorbed from `win11-clean.ps1` into `base-box.ps1`:
 - **`Start-Process` calls** opening win10/win11 scripts in browser — removed
 - **`$hasDdrive` auto-detect** — replaced by `ddrive` concern
 - **Env var checks** (`BoxStarterInstallDev`, `BoxStarterInstallHome`, `BoxStarterInstallHtpc`) — removed
+
+## Idempotency
+
+The script must be safe to run multiple times on the same machine.
+
+**Chocolatey packages:** `InstallChocoApps` is replaced with `Install-ChocoPackage`, a wrapper that calls `choco list --local-only` to check if a package is already installed before invoking `choco install`. Already-installed packages are skipped.
+
+**Registry/config operations:** Most Boxstarter cmdlets (`Set-WindowsExplorerOptions`, `Set-BoxstarterTaskbarOptions`, etc.) and `Set-ItemProperty` calls are already idempotent by nature. No special handling needed.
+
+**`ConfigureDdrive`:** The existing `MoveLibrary` helper already guards with `Test-Path` — already idempotent.
+
+**Win11 tweaks:** Registry `reg add` and `New-Item -Force` calls are idempotent. `winget uninstall` is safe to run when the package is absent (exits non-zero but script continues). Christitus tweaks script is re-runnable.
+
+## Visual Feedback
+
+Every concern block and package install emits progress output so the user can see what is happening:
+
+- `Write-Host` banner before each concern block: e.g. `"--- [Core Apps] ---"`
+- `Install-ChocoPackage` prints one line per package indicating whether it is installing or already installed:
+  - `"  [SKIP] notepadplusplus.install (already installed)"`
+  - `"  [INSTALL] googlechrome"`
+- IIS features loop emits per-feature status in the same style
+- `Get-Concerns` prints a summary table of selected concerns before proceeding
 
 ## Visual Studio
 
