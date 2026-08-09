@@ -108,26 +108,8 @@ function Save-Concerns($concerns)
     Write-Host "Saved config to $script:ConfigPath"
 }
 
-function Get-Concerns()
+function Show-ConcernSummary($concerns)
 {
-    $saved = Get-SavedConcerns
-    $concerns = @{}
-
-    foreach ($def in $script:ConcernDefinitions) {
-        $key = $def.Key
-
-        $savedHint = ''
-        if ($saved -and ($saved.PSObject.Properties.Name -contains $key)) {
-            $savedText = if ([bool]$saved.$key) { 'Yes' } else { 'No' }
-            $savedHint = " (saved: $savedText)"
-        }
-
-        $answer = Read-Host "$($def.Prompt)?$savedHint [y/N]"
-        $concerns[$key] = ($answer -match '^(y|yes)$')
-    }
-
-    Save-Concerns $concerns
-
     Write-Host ""
     Write-Host "--- Selected concerns ---"
     foreach ($def in $script:ConcernDefinitions) {
@@ -135,7 +117,40 @@ function Get-Concerns()
         Write-Host ("  {0} {1}" -f $mark, $def.Key)
     }
     Write-Host ""
+}
 
+function Get-Concerns()
+{
+    $saved = Get-SavedConcerns
+
+    # Saved config present: run unattended (also covers Boxstarter reboot-resume).
+    # Delete the config file to force interactive reconfiguration.
+    if ($saved) {
+        Write-Host "Loaded saved concerns from $script:ConfigPath (delete this file to reconfigure)"
+
+        $concerns = @{}
+        foreach ($def in $script:ConcernDefinitions) {
+            $key = $def.Key
+            $value = $false
+            if ($saved.PSObject.Properties.Name -contains $key) {
+                $value = [bool]$saved.$key
+            }
+            $concerns[$key] = $value
+        }
+
+        Show-ConcernSummary $concerns
+        return $concerns
+    }
+
+    # First run (no saved config): prompt interactively, default No.
+    $concerns = @{}
+    foreach ($def in $script:ConcernDefinitions) {
+        $answer = Read-Host "$($def.Prompt)? [y/N]"
+        $concerns[$def.Key] = ($answer -match '^(y|yes)$')
+    }
+
+    Save-Concerns $concerns
+    Show-ConcernSummary $concerns
     return $concerns
 }
 

@@ -49,15 +49,11 @@ Nine concerns, all user-selectable:
 
 Runs at the very top of `base-box.ps1` before any installation work:
 
-1. Check for `neutmute-boxstarter.json` in Documents
-2. For each concern (fixed order matching execution order):
-   - No saved config: `Install Core apps? [y/N]: `
-   - Saved config exists: `Install Core apps? (saved: Yes) [y/N]: `
-3. Build `$concerns` hashtable from responses
-4. Save `$concerns` back to JSON (overwrite)
-5. Return `$concerns`
+1. Check for `neutmute-boxstarter.json` in Documents.
+2. **If the config file exists** (subsequent runs, including Boxstarter reboot-resume): load it and apply the saved concerns with NO prompting — fully unattended. Missing keys default to No. Print the selected-concern summary and return.
+3. **If the config file does not exist** (first run): prompt for each concern (fixed order) with `Install Core apps? [y/N]:`. Default is N (Enter = No); the user types `y` to opt in. Save `$concerns` to JSON, print the summary, and return.
 
-**Default is N** (Enter = No). User must type `y` to opt in. This prevents accidental installs on unfamiliar concerns during re-runs.
+To reconfigure after the first run, delete `neutmute-boxstarter.json` and run again.
 
 ## Execution Order
 

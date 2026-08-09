@@ -45,7 +45,7 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
 
 ## Concerns
 
-base-box.ps1 prompts interactively for each "concern" (install area) at runtime. Answers are saved to `neutmute-boxstarter.json` in the user's Documents folder and shown as hints on subsequent runs. The prompt default is No; type `y` to opt in.
+On the first run (when no `neutmute-boxstarter.json` exists), base-box.ps1 prompts interactively for each "concern" (install area); the prompt default is No, type `y` to opt in. Answers are saved to `neutmute-boxstarter.json` in the user's Documents folder. On every subsequent run — including Boxstarter reboot-resume cycles — the saved config is applied automatically with no prompting (fully unattended). Delete `neutmute-boxstarter.json` to reconfigure.
 
 Available concerns:
 
@@ -109,7 +109,7 @@ When D: drive exists and is not a CD-ROM:
 ## Important Notes
 
 - Boxstarter handles automatic reboots during installation
-- Install choices ("concerns") are prompted once and persisted to `neutmute-boxstarter.json` in Documents; the script is idempotent across re-runs
+- Install choices ("concerns") are prompted on the first run and persisted to `neutmute-boxstarter.json` in Documents; subsequent runs (including Boxstarter reboot-resume) apply the saved config unattended with no prompts. Delete the file to reconfigure. The script is idempotent across re-runs.
 - Chocolatey global confirmation is enabled (no need for --yes flag)
 - Desktop shortcuts are automatically cleaned up at the end
 - Notepad++ configuration is downloaded from this GitHub repo
