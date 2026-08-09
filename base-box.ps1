@@ -1,89 +1,178 @@
-<# 
+<#
 #OPTIONAL
 
-    # If Dev Machine
-    [Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Machine") # for reboots
-    [Environment]::SetEnvironmentVariable("BoxStarterInstallDev", "1", "Process") # for right n
-    
-    # If Home Machine
-    [Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Machine") # for reboots
-    [Environment]::SetEnvironmentVariable("BoxStarterInstallHome", "1", "Process") # for right now
-    
-    # If HTPC
-    [Environment]::SetEnvironmentVariable("BoxStarterInstallHtpc", "1", "Machine") # for reboots
-    [Environment]::SetEnvironmentVariable("BoxStarterInstallHtpc", "1", "Process") # for right now
-    
-#START
+    Run via Boxstarter:
+
     Set-ExecutionPolicy Unrestricted
     . { iwr -useb http://boxstarter.org/bootstrapper.ps1 } | iex; get-boxstarter -Force
     $cred=Get-Credential
     Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1 -Credential $cred
+
+    Install profiles ("concerns") are chosen interactively at runtime and
+    persisted to neutmute-boxstarter.json in the user's Documents folder.
+    The script is idempotent and safe to run multiple times.
 #>
 Import-Module Boxstarter.Chocolatey
 
+# ---------------------------------------------------------------------------
+# Concern configuration
+# ---------------------------------------------------------------------------
+
+$script:ConfigPath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'neutmute-boxstarter.json'
+
+$script:ConcernDefinitions = @(
+    @{ Key = 'core';             Prompt = 'Install Core apps' },
+    @{ Key = 'baseSettings';     Prompt = 'Configure base Windows settings' },
+    @{ Key = 'regionalSettings'; Prompt = 'Apply regional settings (Australia)' },
+    @{ Key = 'ddrive';           Prompt = 'Configure D: drive and relocate folders' },
+    @{ Key = 'home';             Prompt = 'Install Home apps' },
+    @{ Key = 'htpc';             Prompt = 'Install HTPC apps' },
+    @{ Key = 'dev';              Prompt = 'Install Dev apps' },
+    @{ Key = 'iis';              Prompt = 'Install IIS' },
+    @{ Key = 'visualStudio';     Prompt = 'Install Visual Studio 2026 Community' }
+)
+
+# ---------------------------------------------------------------------------
+# Application lists
+# ---------------------------------------------------------------------------
+
 $userSettingsApps = @(
-    'taskbar-never-combine'
-    ,'explorer-show-all-folders'
-    ,'explorer-expand-to-current-folder'
+    'taskbar-never-combine',
+    'explorer-show-all-folders',
+    'explorer-expand-to-current-folder'
 )
 
 $coreApps = @(
-    'chocolatey'
-	,'bitwarden'
-    ,'firefox'
-    ,'googlechrome'
-    ,'notepadplusplus.install'
-    ,'paint.net'
-    ,'irfanview'
-    ,'irfanviewplugins'
-	,'fscapture'
-    ,'7zip.install'
-    ,'shutup10'                  #Windows privacy. Execute with OOSU10.exe
-    ,'veracrypt'        
-    ,'powershellhere'
-    ,'powershellhere-elevated'
-	,'windirstat'
-    ,'wakemeonlan'
-    #,'bulkrenameutility'        #works normally but fails under boxstarter
-    #,'agentransack'             #works normally but fails under boxstarter
+    'chocolatey',
+    'bitwarden',
+    'firefox',
+    'googlechrome',
+    'notepadplusplus.install',
+    'paint.net',
+    'irfanview',
+    'irfanviewplugins',
+    'fscapture',
+    '7zip.install',
+    'shutup10',                  # Windows privacy. Execute with OOSU10.exe
+    'veracrypt',
+    'powershellhere',
+    'powershellhere-elevated',
+    'windirstat',
+    'wakemeonlan'
 )
 
 $homeApps = @(
-    
-#    ,'itunes'
-#    ,'handbrake.install'
-#    ,'steam'					# want this to go to d:
-    ,'syncbackfree'
-    ,'spotify'
-    ,'joplin'
-    ,'calibre'
-    ,'winamp'        
-    ,'audacity'
-    ,'alldup'                   # freeware tool for searching and removing file duplicates on your computer
-	,'beebeep'
-	,'sendtokindle'
-	,'signal'
+    'syncbackfree',
+    'spotify',
+    'joplin',
+    'calibre',
+    'winamp',
+    'audacity',
+    'alldup',                    # find and remove duplicate files
+    'beebeep',
+    'sendtokindle',
+    'signal'
 )
 
 $htpcApps = @(
-   # 'k-litecodecpackfull'
-   # ,'mssql2014express-defaultinstance'
-   # ,'sql-server-management-studio'
-   # ,'plexmediaserver'
-    ,'steam'
-    ,'syncbackfree'
-    ,'kodi'
+    'steam',
+    'syncbackfree',
+    'kodi'
 )
 
-$Boxstarter.RebootOk=$true
-$Boxstarter.NoPassword=$false
-$Boxstarter.AutoLogin=$true
+$Boxstarter.RebootOk = $true
+$Boxstarter.NoPassword = $false
+$Boxstarter.AutoLogin = $true
 
-# Need to ensure D: exists but also that it isn't the CD ROM
-$hasDdrive = -not((Get-CimInstance Win32_LogicalDisk | Where-Object{($_.DriveType -eq 3) -and ($_.DeviceID -eq "D:")}) -eq $null)
+# ---------------------------------------------------------------------------
+# Concern prompting / persistence
+# ---------------------------------------------------------------------------
+
+function Get-SavedConcerns()
+{
+    if (Test-Path $script:ConfigPath) {
+        try {
+            $json = Get-Content -Path $script:ConfigPath -Raw | ConvertFrom-Json
+            return $json.concerns
+        } catch {
+            Write-Warning "Could not parse $script:ConfigPath, ignoring: $_"
+        }
+    }
+    return $null
+}
+
+function Save-Concerns($concerns)
+{
+    $wrapper = [PSCustomObject]@{ concerns = [PSCustomObject]$concerns }
+    $wrapper | ConvertTo-Json | Set-Content -Path $script:ConfigPath -Encoding UTF8
+    Write-Host "Saved config to $script:ConfigPath"
+}
+
+function Get-Concerns()
+{
+    $saved = Get-SavedConcerns
+    $concerns = @{}
+
+    foreach ($def in $script:ConcernDefinitions) {
+        $key = $def.Key
+
+        $savedHint = ''
+        if ($saved -and ($saved.PSObject.Properties.Name -contains $key)) {
+            $savedText = if ([bool]$saved.$key) { 'Yes' } else { 'No' }
+            $savedHint = " (saved: $savedText)"
+        }
+
+        $answer = Read-Host "$($def.Prompt)?$savedHint [y/N]"
+        $concerns[$key] = ($answer -match '^(y|yes)$')
+    }
+
+    Save-Concerns $concerns
+
+    Write-Host ""
+    Write-Host "--- Selected concerns ---"
+    foreach ($def in $script:ConcernDefinitions) {
+        $mark = if ($concerns[$def.Key]) { '[X]' } else { '[ ]' }
+        Write-Host ("  {0} {1}" -f $mark, $def.Key)
+    }
+    Write-Host ""
+
+    return $concerns
+}
+
+# ---------------------------------------------------------------------------
+# Idempotent Chocolatey install helpers
+# ---------------------------------------------------------------------------
+
+function Test-ChocoInstalled($packageName)
+{
+    $chocoInstall = if ($env:ChocolateyInstall) { $env:ChocolateyInstall } else { 'C:\ProgramData\chocolatey' }
+    return Test-Path (Join-Path $chocoInstall (Join-Path 'lib' $packageName))
+}
+
+function Install-ChocoPackage($packageName)
+{
+    if (Test-ChocoInstalled $packageName) {
+        Write-Host "  [SKIP] $packageName (already installed)"
+        return
+    }
+    Write-Host "  [INSTALL] $packageName"
+    choco install $packageName --limitoutput
+}
+
+function Install-ChocoPackages($packageArray)
+{
+    foreach ($package in $packageArray) {
+        Install-ChocoPackage $package
+    }
+}
+
+# ---------------------------------------------------------------------------
+# Configuration functions
+# ---------------------------------------------------------------------------
 
 function ConfigureBaseSettings()
 {
+    Write-Host "--- [Base Settings] ---"
     Update-ExecutionPolicy -Policy Unrestricted
 
     Set-Volume -DriveLetter $env:SystemDrive[0] -NewFileSystemLabel "System"
@@ -93,7 +182,7 @@ function ConfigureBaseSettings()
     Disable-BingSearch
 
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device" -Name "DevicePasswordLessBuildVersion" -Value 0 # Run 'netplz' to then allow automatic logon
-        
+
     Start-Process 'powercfg.exe' -Verb runAs -ArgumentList '/h off'     # Disable hibernate
 }
 
@@ -102,25 +191,18 @@ function MoveLibrary {
         $libraryName,
         $newPath
     )
-    
-    if(-not (Test-Path $newPath))  #idempotent
-    {
+
+    if (-not (Test-Path $newPath)) {  # idempotent
         Move-LibraryDirectory -libraryName $libraryName -newPath $newPath
     }
 }
 
-function InstallChocoApps($packageArray){
-
-    foreach ($package in $packageArray) {
-        &choco install $package --limitoutput
-    }
-
-}
-
-function SetRegionalSettings(){
-    #http://stackoverflow.com/questions/4235243/how-to-set-timezone-using-powershell
+function SetRegionalSettings()
+{
+    Write-Host "--- [Regional Settings] ---"
+    # http://stackoverflow.com/questions/4235243/how-to-set-timezone-using-powershell
     &"$env:windir\system32\tzutil.exe" /s "AUS Eastern Standard Time"
-    
+
     Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sShortDate     -Value dd-MMM-yy
     Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sCountry       -Value Australia
     Set-ItemProperty -Path "HKCU:\Control Panel\International" -Name sShortTime     -Value HH:mm
@@ -138,154 +220,120 @@ function InstallWindowsUpdate()
 }
 
 function InstallGraphicsDrivers()
-{   
+{
     $nvidiaGpu = Get-CimInstance Win32_VideoController | Where-Object { $_.Name -like '*NVIDIA*' }
     if ($nvidiaGpu) {
         Write-BoxstarterMessage "NVIDIA GPU detected ($($nvidiaGpu.Name)), installing display driver..."
-        choco install nvidia-display-driver
+        Install-ChocoPackage 'nvidia-display-driver'
     }
     else {
         Write-BoxstarterMessage "NVIDIA GPU not found, not installing drivers"
     }
 }
 
-function InstallSqlServer()
-{   
-    #rejected by chocolatey.org since iso image is required  :|
-    $sqlPackageSource = "https://www.myget.org/F/nm-chocolatey-packs/api/v2"
-
-    choco install sql-server-management-studio
-        
-    if ((Test-Path env:\choco:sqlserver2008:isoImage) -or (Test-Path env:\choco:sqlserver2008:setupFolder))
-    {
-        if (Test-PendingReboot) { Invoke-Reboot }   
-        $env:choco:sqlserver2008:INSTANCEID="sql2008"
-        $env:choco:sqlserver2008:INSTANCENAME="sql2008"
-        $env:choco:sqlserver2008:AGTSVCACCOUNT="NT AUTHORITY\SYSTEM"
-        $env:choco:sqlserver2008:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
-        $env:choco:sqlserver2008:SQLSVCACCOUNT="NT AUTHORITY\SYSTEM"
-        $env:choco:sqlserver2008:INSTALLSQLDATADIR="D:\Data\sql"
-        choco install sqlserver2008 --source=$sqlPackageSource
-    }
-    
-    if ((Test-Path env:\choco:sqlserver2012:isoImage) -or (Test-Path env:\choco:sqlserver2012:setupFolder))
-    {
-        if (Test-PendingReboot) { Invoke-Reboot }
-        $env:choco:sqlserver2012:INSTALLSQLDATADIR="D:\Data\Sql"
-        $env:choco:sqlserver2012:INSTANCEID="sql2012"
-        $env:choco:sqlserver2012:INSTANCENAME="sql2012"
-        $env:choco:sqlserver2012:FEATURES="SQLENGINE"
-        $env:choco:sqlserver2012:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2012"
-        $env:choco:sqlserver2012:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2012"
-        $env:choco:sqlserver2012:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
-        choco install sqlserver2012 --source=$sqlPackageSource
-    }
-    
-    if ((Test-Path env:\choco:sqlserver2016:isoImage) -or (Test-Path env:\choco:sqlserver2016:setupFolder))
-    {
-        # Note: No support for Windows 7 https://msdn.microsoft.com/en-us/library/ms143506.aspx
-        if (Test-PendingReboot) { Invoke-Reboot }
-        $env:choco:sqlserver2016:INSTALLSQLDATADIR="D:\Data\Sql"
-        $env:choco:sqlserver2016:INSTANCEID="sql2016"
-        $env:choco:sqlserver2016:INSTANCENAME="sql2016"
-        $env:choco:sqlserver2016:AGTSVCACCOUNT="NT Service\SQLAgent`$SQL2016"
-        $env:choco:sqlserver2016:SQLSVCACCOUNT="NT Service\MSSQL`$SQL2016"
-        $env:choco:sqlserver2016:SQLCOLLATION="SQL_Latin1_General_CP1_CI_AS"
-        choco install sqlserver2016 --source=$sqlPackageSource
-    }   
-}
-
-function InstallChocoDevApps
+function InstallChocoDevApps()
 {
-    $devApps = @(
-        #'nsis.install'
-        #,'commandwindowhere'
-        #,'filezilla'
-        #,'virtualbox'  # if VM we want this manually 
-        #,'nugetpackageexplorer'
-        #,'wireshark'
-        'autohotkey'
-        ,'checksum'
-        ,'diffmerge'
-        ,'gitextensions'
-        #,'ilspy'       # unused
-        ,'sqlitebrowser'
-        ,'nmap'
-        ,'nuget.commandline'
-        ,'openssl'
-        ,'putty'
-        ,'rdcman'                       # remote desktop connection manager 
-        ,'slack'
-        ,'sql-server-management-studio'
-        ,'vscode'
-        ,'vswhere'
-        ,'winscp'
-        ,'wintail'
+    Write-Host "--- [Dev Apps] ---"
 
+    $devApps = @(
+        'autohotkey',
+        'checksum',
+        'diffmerge',
+        'gitextensions',
+        'sqlitebrowser',
+        'nmap',
+        'nuget.commandline',
+        'openssl',
+        'putty',
+        'rdcman',                       # remote desktop connection manager
+        'slack',
+        'sql-server-management-studio',
+        'vscode',
+        'vswhere',
+        'winscp',
+        'wintail'
     )
 
-    choco install git.install --params "'/GitAndUnixToolsOnPath /WindowsTerminal'"
-    
-    InstallChocoApps $devApps
+    if (Test-ChocoInstalled 'git.install') {
+        Write-Host "  [SKIP] git.install (already installed)"
+    } else {
+        Write-Host "  [INSTALL] git.install"
+        choco install git.install --params "'/GitAndUnixToolsOnPath /WindowsTerminal'" --limitoutput
+    }
 
-    choco install sourcetree #do last since not silent
-	
-	# AWS Powershell tools
-	Install-Module -Name AWS.Tools.Common
-	Install-Module -Name AWS.Tools.EC2
+    Install-ChocoPackages $devApps
+
+    if (Test-ChocoInstalled 'sourcetree') {
+        Write-Host "  [SKIP] sourcetree (already installed)"
+    } else {
+        Write-Host "  [INSTALL] sourcetree"
+        choco install sourcetree --limitoutput   # do last since not silent
+    }
+
+    # AWS PowerShell tools
+    Install-Module -Name AWS.Tools.Common -Force
+    Install-Module -Name AWS.Tools.EC2 -Force
 }
 
 function InstallVisualStudio()
 {
-    choco install visualstudio2022community --package-parameters "--allWorkloads --includeRecommended --passive --locale en-US"
+    Write-Host "--- [Visual Studio] ---"
+    if (Test-ChocoInstalled 'visualstudio2026community') {
+        Write-Host "  [SKIP] visualstudio2026community (already installed)"
+        return
+    }
+    Write-Host "  [INSTALL] visualstudio2026community"
+    choco install visualstudio2026community --package-parameters "--allWorkloads --includeRecommended --passive --locale en-US"
 }
 
 function InstallInternetInformationServices()
 {
+    Write-Host "--- [IIS] ---"
     $windowsFeatures = @(
-        'Windows-Identity-Foundation'
-        ,'Microsoft-Windows-Subsystem-Linux'
-        ,'IIS-WebServerRole'
-        ,'IIS-WebServer'
-        ,'IIS-CommonHttpFeatures'
-        ,'IIS-HttpErrors'
-        ,'IIS-HttpRedirect'
-        ,'IIS-ApplicationDevelopment'
-        ,'IIS-NetFxExtensibility45'
-        ,'IIS-HealthAndDiagnostics'
-        ,'IIS-HttpLogging'
-        ,'IIS-LoggingLibraries'
-        ,'IIS-RequestMonitor'
-        ,'IIS-HttpTracing'
-        ,'IIS-Security'
-        ,'IIS-URLAuthorization'
-        ,'IIS-RequestFiltering'
-        ,'IIS-Performance'
-        ,'IIS-HttpCompressionDynamic'
-        ,'IIS-WebServerManagementTools'
-        ,'IIS-ManagementScriptingTools'
-        ,'IIS-HostableWebCore'
-        ,'IIS-StaticContent'
-        ,'IIS-DefaultDocument'
-        ,'IIS-WebSockets'
-        ,'IIS-ASPNET'
-        ,'IIS-ServerSideIncludes'
-        ,'IIS-CustomLogging'
-        ,'IIS-BasicAuthentication'
-        ,'IIS-HttpCompressionStatic'
-        ,'IIS-ManagementConsole'
-        ,'IIS-ManagementService'
-        ,'IIS-WMICompatibility'
-        ,'IIS-CertProvider'
-        ,'IIS-WindowsAuthentication'
-        ,'IIS-DigestAuthentication'
+        'Windows-Identity-Foundation',
+        'Microsoft-Windows-Subsystem-Linux',
+        'IIS-WebServerRole',
+        'IIS-WebServer',
+        'IIS-CommonHttpFeatures',
+        'IIS-HttpErrors',
+        'IIS-HttpRedirect',
+        'IIS-ApplicationDevelopment',
+        'IIS-NetFxExtensibility45',
+        'IIS-HealthAndDiagnostics',
+        'IIS-HttpLogging',
+        'IIS-LoggingLibraries',
+        'IIS-RequestMonitor',
+        'IIS-HttpTracing',
+        'IIS-Security',
+        'IIS-URLAuthorization',
+        'IIS-RequestFiltering',
+        'IIS-Performance',
+        'IIS-HttpCompressionDynamic',
+        'IIS-WebServerManagementTools',
+        'IIS-ManagementScriptingTools',
+        'IIS-HostableWebCore',
+        'IIS-StaticContent',
+        'IIS-DefaultDocument',
+        'IIS-WebSockets',
+        'IIS-ASPNET',
+        'IIS-ServerSideIncludes',
+        'IIS-CustomLogging',
+        'IIS-BasicAuthentication',
+        'IIS-HttpCompressionStatic',
+        'IIS-ManagementConsole',
+        'IIS-ManagementService',
+        'IIS-WMICompatibility',
+        'IIS-CertProvider',
+        'IIS-WindowsAuthentication',
+        'IIS-DigestAuthentication'
     )
-    
-    foreach ($package in $windowsFeatures) {
-        &choco install $package --source windowsfeatures
+
+    foreach ($feature in $windowsFeatures) {
+        Write-Host "  [FEATURE] $feature"
+        &choco install $feature --source windowsfeatures --limitoutput
     }
-	
-	choco install -y urlrewrite		# Used for WASM / Blazor apps
+
+    Install-ChocoPackage 'urlrewrite'   # Used for WASM / Blazor apps
 }
 
 function DownloadConfigFiles()
@@ -300,18 +348,18 @@ function CleanDesktopShortcuts()
 {
     Write-Host "Cleaning desktop of shortcuts"
     $allUsersDesktop = "C:\Users\Public\Desktop"
-    Get-ChildItem -Path $allUsersDesktop\*.lnk -Exclude *BoxStarter* | remove-item
+    Get-ChildItem -Path $allUsersDesktop\*.lnk -Exclude *BoxStarter* | Remove-Item
 }
 
 function ConfigureDdrive()
 {
     Write-BoxstarterMessage "Configuring D:\"
-    
+
     Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
-    
+
     $userDataPath = "D:\Data\Documents"
     $mediaPath = "D:\Media"
-    
+
     MoveLibrary -libraryName "My Pictures" -newPath (Join-Path $userDataPath "Pictures")
     MoveLibrary -libraryName "Personal"    -newPath (Join-Path $userDataPath "Documents")
     MoveLibrary -libraryName "Desktop"     -newPath (Join-Path $userDataPath "Desktop")
@@ -320,9 +368,34 @@ function ConfigureDdrive()
     MoveLibrary -libraryName "Downloads"   -newPath "D:\Downloads"
 }
 
-SetRegionalSettings
+function Invoke-Win11Tweaks()
+{
+    Write-Host "--- [Windows 11 Tweaks] ---"
 
-# SQL Server requires some KB patches before it will work, so windows update first
+    # Restore classic right-click context menu ("Show more options" always)
+    reg add "HKCU\Software\Classes\CLSID\{86ca1aa0-34aa-4e8b-a509-50c905bae2a2}\InprocServer32" /ve /d "" /f
+
+    # Remove "Edit in Notepad" context menu entry
+    # https://www.elevenforum.com/t/add-or-remove-edit-in-notepad-context-menu-in-windows-11.20485/
+    New-Item -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked" -Force | Out-Null
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked" -Name "{CA6CC9F1-867A-481E-951E-A28C5E4F01EA}" -Value "" -Type String
+
+    # Remove OneDrive
+    winget uninstall Microsoft.OneDrive --accept-source-agreements
+
+    # Chris Titus Tech Windows Utility tweaks
+    iwr -useb https://christitus.com/win | iex
+}
+
+# ===========================================================================
+# Main
+# ===========================================================================
+
+$concerns = Get-Concerns
+
+if ($concerns['regionalSettings']) { SetRegionalSettings }
+
+# Windows update early ensures prerequisites are met
 InstallWindowsUpdate
 
 InstallGraphicsDrivers
@@ -330,52 +403,47 @@ InstallGraphicsDrivers
 # disable chocolatey default confirmation behaviour (no need for --yes)
 choco feature enable --name=allowGlobalConfirmation
 
-ConfigureBaseSettings
+if ($concerns['baseSettings']) { ConfigureBaseSettings }
 
 Write-BoxstarterMessage "Starting chocolatey installs"
 
-InstallChocoApps $userSettingsApps    
+Write-Host "--- [User Settings] ---"
+Install-ChocoPackages $userSettingsApps
 
-InstallChocoApps $coreApps
+if ($concerns['core']) {
+    Write-Host "--- [Core Apps] ---"
+    Install-ChocoPackages $coreApps
+}
 
-if (Test-Path env:\BoxStarterInstallHome)
-{
-    Enable-RemoteDesktop                            # already enabled on corp machine and it failed when running
+if ($concerns['ddrive']) { ConfigureDdrive }
+
+if ($concerns['home']) {
+    Write-Host "--- [Home Apps] ---"
+    Enable-RemoteDesktop
     Disable-BingSearch
     Disable-GameBarTips
-    InstallChocoApps $homeApps
+    Install-ChocoPackages $homeApps
 }
 
-if (Test-Path env:\BoxStarterInstallHtpc)
-{
-    InstallChocoApps $htpcApps
+if ($concerns['htpc']) {
+    Write-Host "--- [HTPC Apps] ---"
+    Install-ChocoPackages $htpcApps
 }
 
-if ($hasDdrive)
-{
-    ConfigureDdrive
-}
-
-# Put last as the big SQL server / VS2017 tend to fail and kill Boxstarter it seems
-if (Test-Path env:\BoxStarterInstallDev)
-{
+# Put dev-heavy installs later as the big ones tend to fail and kill Boxstarter
+if ($concerns['dev']) {
     Write-BoxstarterMessage "Installing Dev Apps"
     InstallChocoDevApps
-    #InstallSqlServer
-    InstallInternetInformationServices
-    #InstallVisualStudio
 }
+
+if ($concerns['iis']) { InstallInternetInformationServices }
+
+if ($concerns['visualStudio']) { InstallVisualStudio }
 
 CleanDesktopShortcuts
 
 DownloadConfigFiles
 
-# Assume Windows 10
-Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win10-clean.ps1
+Invoke-Win11Tweaks
 
-# Leaving global confirmation enabled
-# choco feature disable --name=allowGlobalConfirmation
-
-Write-Host "Follow extra optional cleanup steps in win10-clean.ps1"
-Start-Process https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win10-clean.ps1
-Start-Process https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/win11-clean.ps1
+Write-Host "Provisioning complete."
