@@ -454,7 +454,7 @@ function ConfigureDdrive()
 
     Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
 
-    $userDataPath = "D:\Data\Documents"
+    $userDataPath = "D:\Data\User"
     $mediaPath = "D:\Media"
 
     MoveLibrary -libraryName "My Pictures" -newPath (Join-Path $userDataPath "Pictures")

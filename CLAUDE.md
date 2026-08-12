@@ -14,7 +14,7 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
   - Entry point for most installations
   - Interactively prompts for "concerns" (install areas) at runtime and persists answers to `neutmute-boxstarter.json` in the user's Documents folder
   - Idempotent and safe to run multiple times; skips already-installed Chocolatey packages
-  - Applies Windows 11 cleanup tweaks inline at the end (classic context menu, remove OneDrive, block "Edit in Notepad", Chris Titus tweaks)
+  - Applies Windows 11 cleanup tweaks at the end when the `win11Tweaks` concern is selected
 
 - **bootstrap.ps1**: Automated entry point for vagrant/unattended installations
   - Downloads and installs Boxstarter
@@ -47,10 +47,14 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
 
 On the first run (when no `neutmute-boxstarter.json` exists), base-box.ps1 prompts interactively for each "concern" (install area); the prompt default is No, type `y` to opt in. Answers are saved to `neutmute-boxstarter.json` in the user's Documents folder. On every subsequent run — including Boxstarter reboot-resume cycles — the saved config is applied automatically with no prompting (fully unattended). Delete `neutmute-boxstarter.json` to reconfigure.
 
+Each prompt shows a description of what the concern does, and for concerns that
+install Chocolatey packages, the full package list.
+
 Available concerns:
 
 - **core**: Essential utilities for all machines (browsers, Notepad++, 7zip, etc.)
 - **baseSettings**: Windows Explorer/taskbar tweaks, power options, execution policy
+- **autoLogon**: Unhides the netplwiz password checkbox so automatic logon can be configured
 - **regionalSettings**: Australian timezone and date/time formats
 - **ddrive**: D: drive setup and Windows known-folder relocation
 - **home**: Home-specific apps (Spotify, Joplin, Calibre, etc.) plus Remote Desktop
@@ -58,6 +62,8 @@ Available concerns:
 - **dev**: Developer tools (Git, VS Code, SSMS, Slack, etc.)
 - **iis**: IIS Windows features and URL Rewrite (independent of dev)
 - **visualStudio**: Visual Studio 2026 Community
+- **win11Tweaks**: Classic context menu, block "Edit in Notepad", remove OneDrive
+- **chrisTitus**: Chris Titus Tech Windows Utility (interactive GUI, blocks unattended runs)
 
 ## Application Organization
 
@@ -67,7 +73,7 @@ Apps are organized into logical arrays in base-box.ps1:
 - **coreApps**: Essential utilities (browsers, Notepad++, 7zip, etc.) (top-level array, `core` concern)
 - **homeApps**: Home-specific apps (Spotify, Joplin, Calibre, etc.) (top-level array, `home` concern)
 - **htpcApps**: Media center apps (Kodi, Steam) (top-level array, `htpc` concern)
-- **devApps**: Developer tools (Git, VS Code, SSMS, Slack, etc.) — defined *inside* `InstallChocoDevApps()`, not at top level (`dev` concern)
+- **devApps**: Developer tools (Git, VS Code, SSMS, Slack, etc.) (top-level array, `dev` concern)
 
 All Chocolatey installs go through `Install-ChocoPackage`, which skips packages already present in `$ChocolateyInstall\lib` for idempotency.
 
@@ -80,6 +86,9 @@ All Chocolatey installs go through `Install-ChocoPackage`, which skips packages 
 - **InstallInternetInformationServices()**: Extensive IIS feature installation — gated by the `iis` concern
 - **ConfigureDdrive()**: D: drive setup and Windows folder relocation
 - **SetRegionalSettings()**: Hardcoded to Australia timezone and date formats
+- **Write-Wrapped($text, $firstPrefix, $contPrefix)**: Word-wraps prompt descriptions and package lists to the console width
+- **Set-AutoLogonPolicy()**: Sets `DevicePasswordLessBuildVersion` — gated by the `autoLogon` concern
+- **Invoke-Win11Tweaks() / Invoke-ChrisTitusUtility()**: Windows 11 tweaks and the Chris Titus utility — gated by the `win11Tweaks` and `chrisTitus` concerns respectively
 
 ## Testing Changes
 
@@ -102,7 +111,7 @@ Modify `SetRegionalSettings()` function if different locale is needed.
 ## D: Drive Conventions
 
 When D: drive exists and is not a CD-ROM:
-- D:\Data\Documents\ - User documents, pictures, desktop
+- D:\Data\User\ - User documents, pictures, desktop
 - D:\Media\ - Videos and music
 - D:\Downloads - Downloads folder
 
