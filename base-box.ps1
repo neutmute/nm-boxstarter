@@ -15,24 +15,6 @@
 Import-Module Boxstarter.Chocolatey
 
 # ---------------------------------------------------------------------------
-# Concern configuration
-# ---------------------------------------------------------------------------
-
-$script:ConfigPath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'neutmute-boxstarter.json'
-
-$script:ConcernDefinitions = @(
-    @{ Key = 'core';             Prompt = 'Install Core apps' },
-    @{ Key = 'baseSettings';     Prompt = 'Configure base Windows settings' },
-    @{ Key = 'regionalSettings'; Prompt = 'Apply regional settings (Australia)' },
-    @{ Key = 'ddrive';           Prompt = 'Configure D: drive and relocate folders' },
-    @{ Key = 'home';             Prompt = 'Install Home apps' },
-    @{ Key = 'htpc';             Prompt = 'Install HTPC apps' },
-    @{ Key = 'dev';              Prompt = 'Install Dev apps' },
-    @{ Key = 'iis';              Prompt = 'Install IIS' },
-    @{ Key = 'visualStudio';     Prompt = 'Install Visual Studio 2026 Community' }
-)
-
-# ---------------------------------------------------------------------------
 # Application lists
 # ---------------------------------------------------------------------------
 
@@ -80,6 +62,85 @@ $htpcApps = @(
     'kodi'
 )
 
+$devApps = @(
+    'autohotkey',
+    'checksum',
+    'diffmerge',
+    'gitextensions',
+    'sqlitebrowser',
+    'nmap',
+    'nuget.commandline',
+    'openssl',
+    'putty',
+    'rdcman',                       # remote desktop connection manager
+    'slack',
+    'sql-server-management-studio',
+    'vscode',
+    'vswhere',
+    'winscp',
+    'wintail'
+)
+
+# ---------------------------------------------------------------------------
+# Concern configuration
+# ---------------------------------------------------------------------------
+
+$script:ConfigPath = Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'neutmute-boxstarter.json'
+
+$script:ConcernDefinitions = @(
+    @{ Key         = 'core'
+       Prompt      = 'Install Core apps'
+       Description = 'Everyday utilities for any machine: browsers, password manager, image viewers and editors, archiver, disk usage and privacy tools.'
+       Packages    = $coreApps },
+
+    @{ Key         = 'baseSettings'
+       Prompt      = 'Configure base Windows settings'
+       Description = 'Explorer and taskbar tweaks (show hidden files and file extensions, full path in title bar, never combine taskbar buttons), PowerShell on the Win+X menu, disables Bing search in Start, labels the system drive "System", sets execution policy to Unrestricted and turns hibernation off.' },
+
+    @{ Key         = 'autoLogon'
+       Prompt      = 'Allow automatic logon'
+       Description = 'Sets DevicePasswordLessBuildVersion to 0, which unhides the "Users must enter a user name and password to use this computer" checkbox in netplwiz. Run netplwiz afterwards and untick it to finish setting up automatic logon.' },
+
+    @{ Key         = 'regionalSettings'
+       Prompt      = 'Apply regional settings (Australia)'
+       Description = 'Sets the timezone to AUS Eastern Standard Time, short date to dd-MMM-yy, short time to HH:mm, long time to HH:mm:ss, country to Australia and language to ENA.' },
+
+    @{ Key         = 'ddrive'
+       Prompt      = 'Configure D: drive and relocate folders'
+       Description = 'Labels D: as "Data" and relocates the Windows known folders: Documents, Pictures and Desktop to D:\Data\User, Videos and Music to D:\Media, Downloads to D:\Downloads.' },
+
+    @{ Key         = 'home'
+       Prompt      = 'Install Home apps'
+       Description = 'Enables Remote Desktop, disables Bing search and Game Bar tips, then installs backup, music, ebook and messaging apps.'
+       Packages    = $homeApps },
+
+    @{ Key         = 'htpc'
+       Prompt      = 'Install HTPC apps'
+       Description = 'Media centre and lounge room machine apps.'
+       Packages    = $htpcApps },
+
+    @{ Key         = 'dev'
+       Prompt      = 'Install Dev apps'
+       Description = 'Developer toolchain. Also installs git.install (Unix tools on PATH, Windows Terminal integration), sourcetree, and the AWS.Tools.Common and AWS.Tools.EC2 PowerShell modules.'
+       Packages    = $devApps },
+
+    @{ Key         = 'iis'
+       Prompt      = 'Install IIS'
+       Description = 'Enables the IIS Windows features (web server, ASP.NET, WebSockets, logging, management console, Windows/Basic/Digest authentication) plus Windows Identity Foundation and the Linux subsystem, then installs the URL Rewrite module.' },
+
+    @{ Key         = 'visualStudio'
+       Prompt      = 'Install Visual Studio 2026 Community'
+       Description = 'Installs Visual Studio 2026 Community with all workloads and recommended components. Large download; runs last so a failure does not take the rest of the run with it.' },
+
+    @{ Key         = 'win11Tweaks'
+       Prompt      = 'Apply Windows 11 tweaks'
+       Description = 'Restores the classic right-click context menu, blocks the "Edit in Notepad" shell extension, and uninstalls OneDrive via winget.' },
+
+    @{ Key         = 'chrisTitus'
+       Prompt      = 'Run the Chris Titus Windows Utility'
+       Description = 'Runs the Chris Titus Tech Windows Utility from christitus.com/win. WARNING: this opens an interactive GUI and will stall an unattended run, including a Boxstarter reboot-resume.' }
+)
+
 $Boxstarter.RebootOk = $true
 $Boxstarter.NoPassword = $false
 $Boxstarter.AutoLogin = $true
@@ -87,6 +148,35 @@ $Boxstarter.AutoLogin = $true
 # ---------------------------------------------------------------------------
 # Concern prompting / persistence
 # ---------------------------------------------------------------------------
+
+function Write-Wrapped($text, $firstPrefix = '  ', $contPrefix = '  ')
+{
+    $width = 78
+    try {
+        if ($Host.UI.RawUI.WindowSize.Width -gt 20) {
+            $width = $Host.UI.RawUI.WindowSize.Width - 1
+        }
+    } catch { }
+
+    $line = $firstPrefix
+    $isEmpty = $true
+
+    foreach ($word in ($text -split '\s+' | Where-Object { $_ })) {
+        if ($isEmpty) {
+            $line = $line + $word
+            $isEmpty = $false
+        }
+        elseif (($line.Length + 1 + $word.Length) -gt $width) {
+            Write-Host $line
+            $line = $contPrefix + $word
+        }
+        else {
+            $line = $line + ' ' + $word
+        }
+    }
+
+    if (-not $isEmpty) { Write-Host $line }
+}
 
 function Get-SavedConcerns()
 {
@@ -145,7 +235,13 @@ function Get-Concerns()
     # First run (no saved config): prompt interactively, default No.
     $concerns = @{}
     foreach ($def in $script:ConcernDefinitions) {
-        $answer = Read-Host "$($def.Prompt)? [y/N]"
+        Write-Host ""
+        Write-Host "$($def.Prompt)?"
+        if ($def.Description) { Write-Wrapped $def.Description }
+        if ($def.Packages) {
+            Write-Wrapped ("Packages: " + ($def.Packages -join ', ')) '  ' '            '
+        }
+        $answer = Read-Host "  [y/N]"
         $concerns[$def.Key] = ($answer -match '^(y|yes)$')
     }
 
@@ -249,25 +345,6 @@ function InstallGraphicsDrivers()
 function InstallChocoDevApps()
 {
     Write-Host "--- [Dev Apps] ---"
-
-    $devApps = @(
-        'autohotkey',
-        'checksum',
-        'diffmerge',
-        'gitextensions',
-        'sqlitebrowser',
-        'nmap',
-        'nuget.commandline',
-        'openssl',
-        'putty',
-        'rdcman',                       # remote desktop connection manager
-        'slack',
-        'sql-server-management-studio',
-        'vscode',
-        'vswhere',
-        'winscp',
-        'wintail'
-    )
 
     if (Test-ChocoInstalled 'git.install') {
         Write-Host "  [SKIP] git.install (already installed)"
