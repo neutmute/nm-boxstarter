@@ -292,9 +292,14 @@ function ConfigureBaseSettings()
     Set-BoxstarterTaskbarOptions -Combine Never
     Disable-BingSearch
 
-    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device" -Name "DevicePasswordLessBuildVersion" -Value 0 # Run 'netplz' to then allow automatic logon
-
     Start-Process 'powercfg.exe' -Verb runAs -ArgumentList '/h off'     # Disable hibernate
+}
+
+function Set-AutoLogonPolicy()
+{
+    Write-Host "--- [Auto Logon] ---"
+    # Unhides the "Users must enter a user name and password" checkbox in netplwiz
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device" -Name "DevicePasswordLessBuildVersion" -Value 0
 }
 
 function MoveLibrary {
@@ -474,8 +479,12 @@ function Invoke-Win11Tweaks()
 
     # Remove OneDrive
     winget uninstall Microsoft.OneDrive --accept-source-agreements
+}
 
-    # Chris Titus Tech Windows Utility tweaks
+function Invoke-ChrisTitusUtility()
+{
+    Write-Host "--- [Chris Titus Windows Utility] ---"
+    # Interactive GUI - will block an unattended run
     iwr -useb https://christitus.com/win | iex
 }
 
@@ -496,6 +505,7 @@ InstallGraphicsDrivers
 choco feature enable --name=allowGlobalConfirmation
 
 if ($concerns['baseSettings']) { ConfigureBaseSettings }
+if ($concerns['autoLogon'])    { Set-AutoLogonPolicy }
 
 Write-BoxstarterMessage "Starting chocolatey installs"
 
@@ -536,6 +546,7 @@ CleanDesktopShortcuts
 
 DownloadConfigFiles
 
-Invoke-Win11Tweaks
+if ($concerns['win11Tweaks']) { Invoke-Win11Tweaks }
+if ($concerns['chrisTitus'])  { Invoke-ChrisTitusUtility }
 
 Write-Host "Provisioning complete."
