@@ -28,16 +28,6 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
   - Fully standalone — self-bootstraps Chocolatey, no Boxstarter required
   - Installs only essential server tools (Chrome, Notepad++, wintail, taskbar tweaks)
 
-- **ddrive.ps1**: Standalone D: drive configuration
-  - Alternative to the D: drive logic in base-box.ps1
-  - Uses Set-KnownFolderPath.ps1 to relocate Windows folders
-
-### Utility Functions
-
-- **Set-KnownFolderPath.ps1**: Reusable function for relocating Windows known folders
-  - Uses Win32 SHSetKnownFolderPath API via P/Invoke
-  - Supports all standard Windows known folders (Documents, Downloads, Desktop, etc.)
-
 ### Config Files (`files/`)
 
 - **files/notepad++/shortcuts.xml**: Downloaded during setup by `DownloadConfigFiles()` to `%AppData%\Notepad++\`
