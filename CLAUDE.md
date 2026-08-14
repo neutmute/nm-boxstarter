@@ -29,7 +29,6 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
 ### Config Files (`files/`)
 
 - **files/notepad++/shortcuts.xml**: Downloaded during setup by `DownloadConfigFiles()` to `%AppData%\Notepad++\`
-- **files/documents/WindowsPowerShell/Microsoft.PowerShell_profile.ps1**: PowerShell profile
 
 ## Concerns
 
