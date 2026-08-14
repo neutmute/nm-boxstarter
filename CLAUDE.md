@@ -30,6 +30,30 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
 
 - **files/notepad++/shortcuts.xml**: Downloaded during setup by `DownloadConfigFiles()` to `%AppData%\Notepad++\`
 
+## Command Line
+
+`base-box.ps1` takes options via a `ValueFromRemainingArguments` param, so each
+is accepted in `-x`, `--x` and `/x` form:
+
+- `--list` — list every concern with its description and packages, marking those selected in the saved config, then exit
+- `--reset` — delete the saved config so the questions are asked again, then continue with a normal run
+- `--help` (also `-h`, `/?`) — show usage and exit
+- `base-box.ps1 dev win11Tweaks` — run only the named concerns
+
+Concern names match case-insensitively. Unknown arguments print a warning plus
+usage and exit 1. `--help` and `--list` exit before Boxstarter is installed, so
+they work on a bare machine.
+
+A **targeted run** (concern names given) sets `$isFullRun = $false`, which skips
+the always-on housekeeping — Windows Update, graphics drivers,
+`userSettingsApps`, `CleanDesktopShortcuts`, `DownloadConfigFiles` — so only what
+was named runs. It also neither reads nor writes the concern selection in the
+saved config, though it does read `settings` for values like `hostName`.
+
+Note that `-?` is intercepted by PowerShell itself and never reaches the script;
+it renders the comment-based help block at the top of the file instead, which is
+why that block duplicates the options list.
+
 ## Concerns
 
 On the first run (when no `neutmute-boxstarter.json` exists), base-box.ps1 prompts interactively for each "concern" (install area); the prompt default is No, type `y` to opt in. Answers are saved to `neutmute-boxstarter.json` in the user's Documents folder. On every subsequent run — including Boxstarter reboot-resume cycles — the saved config is applied automatically with no prompting (fully unattended). Delete `neutmute-boxstarter.json` to reconfigure.
@@ -86,6 +110,10 @@ All Chocolatey installs go through `Install-ChocoPackage`, which skips packages 
 ## Key Functions in base-box.ps1
 
 - **Install-Boxstarter()**: Installs Boxstarter from boxstarter.org if the `Boxstarter.Chocolatey` module is not already available
+- **Get-CommandLineOptions($arguments)**: Parses `-x`/`--x`/`/x` switches and concern names into a `@{ Help; List; Reset; Targets; Unknown }` hashtable
+- **Show-Usage() / Show-ConcernList()**: `--help` and `--list` output; both run before Boxstarter is installed
+- **Reset-SavedConfig()**: Deletes `neutmute-boxstarter.json` for `--reset`
+- **Get-TargetedConcerns($targets)**: Builds a concern hashtable with only the named concerns enabled, prompting up front for any missing `ValueKey` value
 - **Initialize-UnattendedSession()**: Preflight that pre-answers every mid-run prompt source (choco `allowGlobalConfirmation`, NuGet provider bootstrap, PSGallery trust, winget source agreements, `$ConfirmPreference`)
 - **Show-InteractiveWarning($concerns)**: Names the selected concerns that still open a GUI, before any work starts
 - **Get-Concerns()**: Prompts for each concern, persists/loads `neutmute-boxstarter.json`, populates `$script:Settings`, returns the concern hashtable

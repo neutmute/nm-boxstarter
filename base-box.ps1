@@ -1,26 +1,51 @@
 <#
-    Main provisioning script. Run from an elevated PowerShell:
+.SYNOPSIS
+Provisions a Windows machine with Boxstarter and Chocolatey.
+
+.DESCRIPTION
+Run from an elevated PowerShell:
 
     Set-ExecutionPolicy Unrestricted -Force
     .\base-box.ps1
 
-    Boxstarter is installed automatically if it is not already present.
+Boxstarter is installed automatically if it is not already present.
 
-    Install profiles ("concerns") are chosen interactively at runtime and
-    persisted to neutmute-boxstarter.json in the user's Documents folder.
-    The script is idempotent and safe to run multiple times.
+Install areas ("concerns") are chosen interactively on the first run and
+persisted to neutmute-boxstarter.json in the user's Documents folder. Every
+later run applies that saved config unattended. All questions are asked up
+front, so the run never stops to ask once it starts. The script is idempotent
+and safe to run multiple times.
+
+Options (all accept -x, --x or /x form):
+
+    --list          List every concern, with the saved selection marked
+    --reset         Discard the saved config and ask the questions again
+    --help          Show this usage
+
+Naming one or more concerns runs only those, ignoring the saved config:
+
+    .\base-box.ps1 dev win11Tweaks
+
+.EXAMPLE
+.\base-box.ps1
+Normal run. Prompts on the first run, unattended after that.
+
+.EXAMPLE
+.\base-box.ps1 --list
+Lists every available concern and which ones are currently selected.
+
+.EXAMPLE
+.\base-box.ps1 --reset
+Deletes the saved config and asks all the questions again.
+
+.EXAMPLE
+.\base-box.ps1 dev
+Runs only the dev concern, leaving the saved config untouched.
 #>
-
-function Install-Boxstarter()
-{
-    if (Get-Module -ListAvailable -Name Boxstarter.Chocolatey) { return }
-    Write-Host "Installing Boxstarter..."
-    . { Invoke-WebRequest -useb https://boxstarter.org/bootstrapper.ps1 } | Invoke-Expression
-    Get-Boxstarter -Force
-}
-
-Install-Boxstarter
-Import-Module Boxstarter.Chocolatey
+param(
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]] $Arguments
+)
 
 # ---------------------------------------------------------------------------
 # Application lists
@@ -155,9 +180,146 @@ $script:ConcernDefinitions = @(
        Description = 'Runs the Chris Titus Tech Windows Utility from christitus.com/win. WARNING: this opens an interactive GUI and will stall an unattended run, including a Boxstarter reboot-resume.' }
 )
 
-$Boxstarter.RebootOk = $true
-$Boxstarter.NoPassword = $false
-$Boxstarter.AutoLogin = $true
+# ---------------------------------------------------------------------------
+# Command line
+# ---------------------------------------------------------------------------
+
+function Install-Boxstarter()
+{
+    if (Get-Module -ListAvailable -Name Boxstarter.Chocolatey) { return }
+    Write-Host "Installing Boxstarter..."
+    . { Invoke-WebRequest -useb https://boxstarter.org/bootstrapper.ps1 } | Invoke-Expression
+    Get-Boxstarter -Force
+}
+
+function Show-Usage()
+{
+    Write-Host ""
+    Write-Host "base-box.ps1 - provisions a Windows machine"
+    Write-Host ""
+    Write-Host "USAGE"
+    Write-Host "  .\base-box.ps1 [options] [concern ...]"
+    Write-Host ""
+    Write-Host "OPTIONS  (each accepts -x, --x or /x form)"
+    Write-Host "  --list      List every concern, marking the ones currently selected"
+    Write-Host "  --reset     Discard the saved config and ask the questions again"
+    Write-Host "  --help      Show this usage"
+    Write-Host ""
+    Write-Host "CONCERNS"
+    Write-Wrapped ("Naming one or more concerns runs only those and leaves the saved " +
+                   "config untouched. Run --list to see the names.") '  ' '  '
+    Write-Host ""
+    Write-Host "EXAMPLES"
+    Write-Host "  .\base-box.ps1                  Normal run (prompts on first run only)"
+    Write-Host "  .\base-box.ps1 --list           Show all concerns and what is selected"
+    Write-Host "  .\base-box.ps1 --reset          Ask all the questions again"
+    Write-Host "  .\base-box.ps1 dev win11Tweaks  Run just those two concerns"
+    Write-Host ""
+    Write-Host "Config file: $script:ConfigPath"
+    Write-Host ""
+}
+
+function Show-ConcernList()
+{
+    $config = Get-SavedConfig
+    $saved = if ($config) { $config.concerns } else { $null }
+
+    Write-Host ""
+    if ($saved) {
+        Write-Host "Concerns ([X] = selected in $script:ConfigPath)"
+    } else {
+        Write-Host "Concerns (no saved config yet, so nothing is selected)"
+    }
+    Write-Host ""
+
+    foreach ($def in $script:ConcernDefinitions) {
+        $key = $def.Key
+        $isSet = $saved -and ($saved.PSObject.Properties.Name -contains $key) -and [bool]$saved.$key
+        $mark = if ($isSet) { '[X]' } else { '[ ]' }
+        Write-Host ("  {0} {1}" -f $mark, $def.Key)
+        if ($def.Description) { Write-Wrapped $def.Description '        ' '        ' }
+        if ($def.Packages) {
+            Write-Wrapped ("Packages: " + ($def.Packages -join ', ')) '        ' '                  '
+        }
+        Write-Host ""
+    }
+
+    Write-Host "Run a single concern with:  .\base-box.ps1 <name>"
+    Write-Host ""
+}
+
+function Get-CommandLineOptions($arguments)
+{
+    $options = @{ Help = $false; List = $false; Reset = $false; Targets = @(); Unknown = @() }
+    $validKeys = $script:ConcernDefinitions | ForEach-Object { $_.Key }
+
+    foreach ($argument in $arguments) {
+        if (-not $argument) { continue }
+
+        # Accept -x, --x and /x for each switch
+        $bare = $argument -replace '^(--|-|/)', ''
+
+        switch -Regex ($bare) {
+            '^(help|h|\?)$' { $options.Help = $true; continue }
+            '^list$'        { $options.List = $true; continue }
+            '^reset$'       { $options.Reset = $true; continue }
+            default {
+                # Match a concern name case insensitively, but keep the real casing
+                $match = $validKeys | Where-Object { $_ -eq $bare } | Select-Object -First 1
+                if ($match) { $options.Targets += $match }
+                else        { $options.Unknown += $argument }
+            }
+        }
+    }
+
+    return $options
+}
+
+function Reset-SavedConfig()
+{
+    if (Test-Path $script:ConfigPath) {
+        Remove-Item -Path $script:ConfigPath -Force
+        Write-Host "Removed $script:ConfigPath - the questions will be asked again."
+    } else {
+        Write-Host "No saved config at $script:ConfigPath - the questions will be asked anyway."
+    }
+}
+
+function Get-TargetedConcerns($targets)
+{
+    # Only the named concerns run. The saved config is neither read nor written,
+    # so a targeted run cannot quietly change what a normal run would do.
+    $concerns = @{}
+    foreach ($def in $script:ConcernDefinitions) { $concerns[$def.Key] = $false }
+
+    $script:Settings = @{}
+    $config = Get-SavedConfig
+    if ($config -and $config.settings) {
+        foreach ($property in $config.settings.PSObject.Properties) {
+            $script:Settings[$property.Name] = $property.Value
+        }
+    }
+
+    foreach ($target in $targets) {
+        $concerns[$target] = $true
+
+        # A targeted concern still needs its value, so ask now rather than mid-run
+        $def = $script:ConcernDefinitions | Where-Object { $_.Key -eq $target } | Select-Object -First 1
+        if ($def.ValueKey -and -not $script:Settings[$def.ValueKey]) {
+            $value = ''
+            while (-not $value) {
+                $value = (Read-Host "  $($def.ValuePrompt)").Trim()
+            }
+            $script:Settings[$def.ValueKey] = $value
+        }
+    }
+
+    Write-Host ""
+    Write-Host ("Targeted run: " + ($targets -join ', '))
+    Write-Host "The saved config is not read or changed by this run."
+    Write-Host ""
+    return $concerns
+}
 
 # ---------------------------------------------------------------------------
 # Concern prompting / persistence
@@ -594,27 +756,62 @@ function Invoke-ChrisTitusUtility()
 # Main
 # ===========================================================================
 
+# Command line first: --help and --list report and exit without touching the
+# machine, so they stay usable on a box that has no Boxstarter installed.
+$options = Get-CommandLineOptions $Arguments
+
+if ($options.Unknown) {
+    Write-Host ""
+    Write-Warning ("Unknown argument(s): " + ($options.Unknown -join ', '))
+    Show-Usage
+    exit 1
+}
+
+if ($options.Help) { Show-Usage; exit 0 }
+if ($options.List) { Show-ConcernList; exit 0 }
+if ($options.Reset) { Reset-SavedConfig }
+
+Install-Boxstarter
+Import-Module Boxstarter.Chocolatey
+
+$Boxstarter.RebootOk = $true
+$Boxstarter.NoPassword = $false
+$Boxstarter.AutoLogin = $true
+
 # All questions are asked here, before any work starts, so the rest of the
 # run is unattended. Anything that would prompt later belongs in Get-Concerns
 # (as a concern or a ValueKey) or in Initialize-UnattendedSession.
-$concerns = Get-Concerns
+if ($options.Targets) {
+    $concerns = Get-TargetedConcerns $options.Targets
+} else {
+    $concerns = Get-Concerns
+}
+
 Show-InteractiveWarning $concerns
 Initialize-UnattendedSession
 
+# A targeted run does only what was named, so the always-on housekeeping below
+# is skipped. A normal run keeps doing all of it.
+$isFullRun = -not $options.Targets
+
 if ($concerns['regionalSettings']) { SetRegionalSettings }
 
-# Windows update early ensures prerequisites are met
-InstallWindowsUpdate
+if ($isFullRun) {
+    # Windows update early ensures prerequisites are met
+    InstallWindowsUpdate
 
-InstallGraphicsDrivers
+    InstallGraphicsDrivers
+}
 
 if ($concerns['baseSettings']) { ConfigureBaseSettings }
 if ($concerns['autoLogon'])    { Set-AutoLogonPolicy }
 
 Write-BoxstarterMessage "Starting chocolatey installs"
 
-Write-Host "--- [User Settings] ---"
-Install-ChocoPackages $userSettingsApps
+if ($isFullRun) {
+    Write-Host "--- [User Settings] ---"
+    Install-ChocoPackages $userSettingsApps
+}
 
 if ($concerns['core']) {
     Write-Host "--- [Core Apps] ---"
@@ -646,9 +843,11 @@ if ($concerns['iis']) { InstallInternetInformationServices }
 
 if ($concerns['visualStudio']) { InstallVisualStudio }
 
-CleanDesktopShortcuts
+if ($isFullRun) {
+    CleanDesktopShortcuts
 
-DownloadConfigFiles
+    DownloadConfigFiles
+}
 
 if ($concerns['win11Tweaks']) { Invoke-Win11Tweaks }
 
