@@ -37,6 +37,19 @@ On the first run (when no `neutmute-boxstarter.json` exists), base-box.ps1 promp
 Each prompt shows a description of what the concern does, and for concerns that
 install Chocolatey packages, the full package list.
 
+**All questions are asked up front.** `Get-Concerns()` runs first and is the
+only place in the script that calls `Read-Host`; `Initialize-UnattendedSession()`
+then pre-answers everything that would otherwise prompt mid-run (choco global
+confirmation, the NuGet provider bootstrap, PSGallery trust, winget source
+agreements, `$ConfirmPreference`). Nothing after that point may prompt — new
+questions belong in `Get-Concerns()` (as a concern or a `ValueKey`), and new
+non-interactive flags belong in `Initialize-UnattendedSession()`.
+
+Two steps still open a GUI because their installers cannot be silenced
+(`chrisTitus`, and `sourcetree` within `dev`). These cannot be front-loaded, so
+`Show-InteractiveWarning()` names them before any work starts, and
+`Invoke-ChrisTitusUtility()` is ordered dead last.
+
 A concern definition may carry `ValueKey`/`ValuePrompt`. When such a concern is
 selected, the prompt asks for that value and stores it in a `settings` block in
 `neutmute-boxstarter.json` (alongside `concerns`), so later runs stay
@@ -73,6 +86,8 @@ All Chocolatey installs go through `Install-ChocoPackage`, which skips packages 
 ## Key Functions in base-box.ps1
 
 - **Install-Boxstarter()**: Installs Boxstarter from boxstarter.org if the `Boxstarter.Chocolatey` module is not already available
+- **Initialize-UnattendedSession()**: Preflight that pre-answers every mid-run prompt source (choco `allowGlobalConfirmation`, NuGet provider bootstrap, PSGallery trust, winget source agreements, `$ConfirmPreference`)
+- **Show-InteractiveWarning($concerns)**: Names the selected concerns that still open a GUI, before any work starts
 - **Get-Concerns()**: Prompts for each concern, persists/loads `neutmute-boxstarter.json`, populates `$script:Settings`, returns the concern hashtable
 - **Rename-Host()**: Renames the computer to `$script:Settings['hostName']` without `-Restart`, so the change lands at the next reboot — gated by the `renameHost` concern and run last so a pending rename cannot land mid Boxstarter reboot cycle
 - **ConfigureBaseSettings()**: Windows system settings, power options, Explorer options

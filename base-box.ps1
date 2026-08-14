@@ -214,6 +214,53 @@ function Save-Config($concerns, $settings)
     Write-Host "Saved config to $script:ConfigPath"
 }
 
+function Initialize-UnattendedSession()
+{
+    Write-Host "--- [Preflight] ---"
+
+    # Everything here answers a question the rest of the run would otherwise
+    # stop and ask interactively. Keep new prompt sources out of the main run.
+
+    # Suppress PowerShell's own confirmation prompts for the rest of the script
+    $global:ConfirmPreference = 'None'
+
+    # No --yes needed on any choco install
+    choco feature enable --name=allowGlobalConfirmation
+
+    # "NuGet provider is required to continue - install now?" from Install-Module
+    Write-Host "  Bootstrapping the NuGet package provider"
+    Install-PackageProvider -Name NuGet -MinimumVersion 2.8.5.201 -Force -ErrorAction SilentlyContinue | Out-Null
+
+    # "You are installing from an untrusted repository" from Install-Module
+    Write-Host "  Trusting PSGallery"
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted -ErrorAction SilentlyContinue
+
+    # winget source/package agreements
+    Write-Host "  Accepting winget source agreements"
+    winget list --accept-source-agreements --disable-interactivity | Out-Null
+}
+
+function Show-InteractiveWarning($concerns)
+{
+    # Third party GUI installers we cannot silence - warn before the run starts
+    # rather than letting the user discover it an hour in.
+    $interactive = @()
+    if ($concerns['chrisTitus'])   { $interactive += 'chrisTitus - opens a GUI and waits for you. Runs dead last, so everything else is done by then.' }
+    if ($concerns['dev'])          { $interactive += 'dev - the sourcetree installer is not silent. Runs at the end of the dev apps, so the rest of dev is done by then.' }
+    if ($concerns['visualStudio']) { $interactive += 'visualStudio - runs passive, so it shows a progress window but does not ask anything.' }
+
+    if (-not $interactive) {
+        Write-Host "No further prompts - this run is unattended from here."
+        Write-Host ""
+        return
+    }
+
+    Write-Host "No more questions, but these selected concerns open a window during the run:"
+    foreach ($item in $interactive) { Write-Wrapped $item '  - ' '    ' }
+    Write-Host "Everything else is unattended."
+    Write-Host ""
+}
+
 function Show-ConcernSummary($concerns)
 {
     Write-Host ""
@@ -401,9 +448,10 @@ function InstallChocoDevApps()
         choco install sourcetree --limitoutput   # do last since not silent
     }
 
-    # AWS PowerShell tools
-    Install-Module -Name AWS.Tools.Common -Force
-    Install-Module -Name AWS.Tools.EC2 -Force
+    # AWS PowerShell tools. -Force also suppresses the untrusted-repository
+    # prompt; PSGallery is trusted in Initialize-UnattendedSession as well.
+    Install-Module -Name AWS.Tools.Common -Force -AllowClobber -Confirm:$false
+    Install-Module -Name AWS.Tools.EC2 -Force -AllowClobber -Confirm:$false
 }
 
 function InstallVisualStudio()
@@ -512,7 +560,7 @@ function Invoke-Win11Tweaks()
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Blocked" -Name "{CA6CC9F1-867A-481E-951E-A28C5E4F01EA}" -Value "" -Type String
 
     # Remove OneDrive
-    winget uninstall Microsoft.OneDrive --accept-source-agreements
+    winget uninstall Microsoft.OneDrive --silent --disable-interactivity --accept-source-agreements
 }
 
 function Rename-Host()
@@ -546,7 +594,12 @@ function Invoke-ChrisTitusUtility()
 # Main
 # ===========================================================================
 
+# All questions are asked here, before any work starts, so the rest of the
+# run is unattended. Anything that would prompt later belongs in Get-Concerns
+# (as a concern or a ValueKey) or in Initialize-UnattendedSession.
 $concerns = Get-Concerns
+Show-InteractiveWarning $concerns
+Initialize-UnattendedSession
 
 if ($concerns['regionalSettings']) { SetRegionalSettings }
 
@@ -554,9 +607,6 @@ if ($concerns['regionalSettings']) { SetRegionalSettings }
 InstallWindowsUpdate
 
 InstallGraphicsDrivers
-
-# disable chocolatey default confirmation behaviour (no need for --yes)
-choco feature enable --name=allowGlobalConfirmation
 
 if ($concerns['baseSettings']) { ConfigureBaseSettings }
 if ($concerns['autoLogon'])    { Set-AutoLogonPolicy }
@@ -601,9 +651,12 @@ CleanDesktopShortcuts
 DownloadConfigFiles
 
 if ($concerns['win11Tweaks']) { Invoke-Win11Tweaks }
-if ($concerns['chrisTitus'])  { Invoke-ChrisTitusUtility }
 
-# Last: a pending rename must not land in the middle of a Boxstarter reboot cycle
+# A pending rename must not land in the middle of a Boxstarter reboot cycle
 if ($concerns['renameHost']) { Rename-Host }
+
+# Dead last: the only step that blocks on a human. Everything above has
+# finished by the time this opens its window.
+if ($concerns['chrisTitus']) { Invoke-ChrisTitusUtility }
 
 Write-Host "Provisioning complete."
