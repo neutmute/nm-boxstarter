@@ -37,6 +37,11 @@ On the first run (when no `neutmute-boxstarter.json` exists), base-box.ps1 promp
 Each prompt shows a description of what the concern does, and for concerns that
 install Chocolatey packages, the full package list.
 
+A concern definition may carry `ValueKey`/`ValuePrompt`. When such a concern is
+selected, the prompt asks for that value and stores it in a `settings` block in
+`neutmute-boxstarter.json` (alongside `concerns`), so later runs stay
+unattended. `renameHost` is the only user of this today (`hostName`).
+
 Available concerns:
 
 - **core**: Essential utilities for all machines (browsers, Notepad++, 7zip, etc.)
@@ -49,6 +54,7 @@ Available concerns:
 - **dev**: Developer tools (Git, VS Code, SSMS, Slack, etc.)
 - **iis**: IIS Windows features and URL Rewrite (independent of dev)
 - **visualStudio**: Visual Studio 2026 Community
+- **renameHost**: Renames the computer; prompts once for the name and saves it, no reboot triggered
 - **win11Tweaks**: Classic context menu, block "Edit in Notepad", remove OneDrive
 - **chrisTitus**: Chris Titus Tech Windows Utility (interactive GUI, blocks unattended runs)
 
@@ -67,7 +73,8 @@ All Chocolatey installs go through `Install-ChocoPackage`, which skips packages 
 ## Key Functions in base-box.ps1
 
 - **Install-Boxstarter()**: Installs Boxstarter from boxstarter.org if the `Boxstarter.Chocolatey` module is not already available
-- **Get-Concerns()**: Prompts for each concern, persists/loads `neutmute-boxstarter.json`, returns the concern hashtable
+- **Get-Concerns()**: Prompts for each concern, persists/loads `neutmute-boxstarter.json`, populates `$script:Settings`, returns the concern hashtable
+- **Rename-Host()**: Renames the computer to `$script:Settings['hostName']` without `-Restart`, so the change lands at the next reboot — gated by the `renameHost` concern and run last so a pending rename cannot land mid Boxstarter reboot cycle
 - **ConfigureBaseSettings()**: Windows system settings, power options, Explorer options
 - **Install-ChocoPackage($packageName) / Install-ChocoPackages($packageArray)**: Idempotent Chocolatey installer; skips packages already present in `$ChocolateyInstall\lib`
 - **InstallVisualStudio()**: VS 2026 Community install — gated by the `visualStudio` concern

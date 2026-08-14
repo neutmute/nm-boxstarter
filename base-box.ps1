@@ -140,6 +140,12 @@ $script:ConcernDefinitions = @(
        Prompt      = 'Install Visual Studio 2026 Community'
        Description = 'Installs Visual Studio 2026 Community with all workloads and recommended components. Large download; runs last so a failure does not take the rest of the run with it.' },
 
+    @{ Key         = 'renameHost'
+       Prompt      = 'Rename this computer'
+       Description = 'Renames the computer. You are asked for the new name once and it is saved to the config file. No reboot is triggered - the new name takes effect at the next reboot.'
+       ValueKey    = 'hostName'
+       ValuePrompt = 'New computer name' },
+
     @{ Key         = 'win11Tweaks'
        Prompt      = 'Apply Windows 11 tweaks'
        Description = 'Restores the classic right-click context menu, blocks the "Edit in Notepad" shell extension, and uninstalls OneDrive via winget.' },
@@ -186,12 +192,11 @@ function Write-Wrapped($text, $firstPrefix = '  ', $contPrefix = '  ')
     if (-not $isEmpty) { Write-Host $line }
 }
 
-function Get-SavedConcerns()
+function Get-SavedConfig()
 {
     if (Test-Path $script:ConfigPath) {
         try {
-            $json = Get-Content -Path $script:ConfigPath -Raw | ConvertFrom-Json
-            return $json.concerns
+            return Get-Content -Path $script:ConfigPath -Raw | ConvertFrom-Json
         } catch {
             Write-Warning "Could not parse $script:ConfigPath, ignoring: $_"
         }
@@ -199,9 +204,12 @@ function Get-SavedConcerns()
     return $null
 }
 
-function Save-Concerns($concerns)
+function Save-Config($concerns, $settings)
 {
-    $wrapper = [PSCustomObject]@{ concerns = [PSCustomObject]$concerns }
+    $wrapper = [PSCustomObject]@{
+        concerns = [PSCustomObject]$concerns
+        settings = [PSCustomObject]$settings
+    }
     $wrapper | ConvertTo-Json | Set-Content -Path $script:ConfigPath -Encoding UTF8
     Write-Host "Saved config to $script:ConfigPath"
 }
@@ -219,13 +227,15 @@ function Show-ConcernSummary($concerns)
 
 function Get-Concerns()
 {
-    $saved = Get-SavedConcerns
+    $config = Get-SavedConfig
+    $script:Settings = @{}
 
     # Saved config present: run unattended (also covers Boxstarter reboot-resume).
     # Delete the config file to force interactive reconfiguration.
-    if ($saved) {
+    if ($config -and $config.concerns) {
         Write-Host "Loaded saved concerns from $script:ConfigPath (delete this file to reconfigure)"
 
+        $saved = $config.concerns
         $concerns = @{}
         foreach ($def in $script:ConcernDefinitions) {
             $key = $def.Key
@@ -234,6 +244,12 @@ function Get-Concerns()
                 $value = [bool]$saved.$key
             }
             $concerns[$key] = $value
+        }
+
+        if ($config.settings) {
+            foreach ($property in $config.settings.PSObject.Properties) {
+                $script:Settings[$property.Name] = $property.Value
+            }
         }
 
         Show-ConcernSummary $concerns
@@ -250,10 +266,20 @@ function Get-Concerns()
             Write-Wrapped ("Packages: " + ($def.Packages -join ', ')) '  ' '            '
         }
         $answer = Read-Host "  [y/N]"
-        $concerns[$def.Key] = ($answer -match '^(y|yes)$')
+        $isSelected = ($answer -match '^(y|yes)$')
+        $concerns[$def.Key] = $isSelected
+
+        # Concerns that need a value ask for it now so later runs stay unattended
+        if ($isSelected -and $def.ValueKey) {
+            $value = ''
+            while (-not $value) {
+                $value = (Read-Host "  $($def.ValuePrompt)").Trim()
+            }
+            $script:Settings[$def.ValueKey] = $value
+        }
     }
 
-    Save-Concerns $concerns
+    Save-Config $concerns $script:Settings
     Show-ConcernSummary $concerns
     return $concerns
 }
@@ -489,6 +515,26 @@ function Invoke-Win11Tweaks()
     winget uninstall Microsoft.OneDrive --accept-source-agreements
 }
 
+function Rename-Host()
+{
+    Write-Host "--- [Rename Host] ---"
+
+    $newName = $script:Settings['hostName']
+    if (-not $newName) {
+        Write-Warning "  No hostName in $script:ConfigPath, skipping rename"
+        return
+    }
+
+    if ($env:COMPUTERNAME -eq $newName) {
+        Write-Host "  [SKIP] already named $newName"
+        return
+    }
+
+    # No -Restart: the rename lands at the next reboot, whenever that happens
+    Write-Host "  Renaming $env:COMPUTERNAME to $newName (effective at next reboot)"
+    Rename-Computer -NewName $newName -Force -ErrorAction Continue
+}
+
 function Invoke-ChrisTitusUtility()
 {
     Write-Host "--- [Chris Titus Windows Utility] ---"
@@ -556,5 +602,8 @@ DownloadConfigFiles
 
 if ($concerns['win11Tweaks']) { Invoke-Win11Tweaks }
 if ($concerns['chrisTitus'])  { Invoke-ChrisTitusUtility }
+
+# Last: a pending rename must not land in the middle of a Boxstarter reboot cycle
+if ($concerns['renameHost']) { Rename-Host }
 
 Write-Host "Provisioning complete."
