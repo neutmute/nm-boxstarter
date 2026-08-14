@@ -12,17 +12,15 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
 
 - **base-box.ps1**: Main orchestration script that handles the complete machine setup
   - Entry point for most installations
+  - Self-bootstraps Boxstarter via `Install-Boxstarter()` if `Boxstarter.Chocolatey` is not already installed
   - Interactively prompts for "concerns" (install areas) at runtime and persists answers to `neutmute-boxstarter.json` in the user's Documents folder
   - Idempotent and safe to run multiple times; skips already-installed Chocolatey packages
   - Applies Windows 11 cleanup tweaks at the end when the `win11Tweaks` concern is selected
 
-- **bootstrap.ps1**: Automated entry point for vagrant/unattended installations
-  - Downloads and installs Boxstarter
-  - Invokes base-box.ps1 with hardcoded credentials
-
-- **win11-clean.ps1**: Raw PowerShell cleanup for Windows 11 (no Boxstarter dependency)
-  - Uses `reg`, `winget`, and direct registry edits; runs Christitus tweaks via `iwr`
-  - Restores classic right-click menu, removes OneDrive, blocks "Edit in Notepad" context entry
+- **bootstrap.ps1**: Thin entry point — clones this repo and stops
+  - Installs git via winget if it is missing
+  - Clones (or `git pull`s) `https://github.com/neutmute/nm-boxstarter.git` into `nm-boxstarter` under the current directory
+  - Prints instructions to run `base-box.ps1`; it does not invoke it
 
 - **server.ps1**: Minimal profile for server installations
   - Fully standalone — self-bootstraps Chocolatey, no Boxstarter required
@@ -69,6 +67,7 @@ All Chocolatey installs go through `Install-ChocoPackage`, which skips packages 
 
 ## Key Functions in base-box.ps1
 
+- **Install-Boxstarter()**: Installs Boxstarter from boxstarter.org if the `Boxstarter.Chocolatey` module is not already available
 - **Get-Concerns()**: Prompts for each concern, persists/loads `neutmute-boxstarter.json`, returns the concern hashtable
 - **ConfigureBaseSettings()**: Windows system settings, power options, Explorer options
 - **Install-ChocoPackage($packageName) / Install-ChocoPackages($packageArray)**: Idempotent Chocolatey installer; skips packages already present in `$ChocolateyInstall\lib`
@@ -86,7 +85,7 @@ Since this is a provisioning tool, testing locally is destructive. Recommended a
 
 1. Use a VM snapshot before testing
 2. Test individual functions in isolation
-3. Use Vagrant with bootstrap.ps1 for automated testing
+3. Use a VM: run bootstrap.ps1 to clone, then base-box.ps1
 4. Review changes carefully before running as scripts modify registry and install software
 
 ## Regional Settings

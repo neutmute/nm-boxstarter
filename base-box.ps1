@@ -1,17 +1,25 @@
 <#
-#OPTIONAL
+    Main provisioning script. Run from an elevated PowerShell:
 
-    Run via Boxstarter:
+    Set-ExecutionPolicy Unrestricted -Force
+    .\base-box.ps1
 
-    Set-ExecutionPolicy Unrestricted
-    . { iwr -useb http://boxstarter.org/bootstrapper.ps1 } | iex; get-boxstarter -Force
-    $cred=Get-Credential
-    Install-BoxstarterPackage -PackageName https://raw.githubusercontent.com/neutmute/nm-boxstarter/master/base-box.ps1 -Credential $cred
+    Boxstarter is installed automatically if it is not already present.
 
     Install profiles ("concerns") are chosen interactively at runtime and
     persisted to neutmute-boxstarter.json in the user's Documents folder.
     The script is idempotent and safe to run multiple times.
 #>
+
+function Install-Boxstarter()
+{
+    if (Get-Module -ListAvailable -Name Boxstarter.Chocolatey) { return }
+    Write-Host "Installing Boxstarter..."
+    . { Invoke-WebRequest -useb https://boxstarter.org/bootstrapper.ps1 } | Invoke-Expression
+    Get-Boxstarter -Force
+}
+
+Install-Boxstarter
 Import-Module Boxstarter.Chocolatey
 
 # ---------------------------------------------------------------------------
