@@ -26,6 +26,21 @@ This is a Boxstarter-based Windows automated provisioning tool. Boxstarter is a 
   - Fully standalone — self-bootstraps Chocolatey, no Boxstarter required
   - Installs only essential server tools (Chrome, Notepad++, wintail, taskbar tweaks)
 
+- **Set-LockScreen.ps1**: Standalone utility to unpin and set the lock screen image
+  - Not wired into `base-box.ps1` or any concern — run it directly
+  - Clears the image-pinning values from `HKLM\SOFTWARE\Policies\Microsoft\Windows\Personalization`
+    (`LockScreenImage`, `NoChangingLockScreen`, `LockScreenOverlaysDisabled`,
+    `NoLockScreenSlideshow`), which is what MDM/Autopilot typically stamps in.
+    `NoLockScreenCamera` is deliberately left alone — it is a security control, not cosmetic
+  - Backs up all touched keys to timestamped JSON under `%ProgramData%\LockScreenTool\backups`;
+    `-Restore` replays the most recent snapshot
+  - `-Mode Default|Blank|Spotlight|Image`, `-ImagePath`, `-BlankColor`, `-UnlockOnly`,
+    `-Persist`/`-RemovePersist` (logon task, opt-in — only needed if policy is re-pushed)
+  - Prefers the per-user WinRT `LockScreen.SetImageFileAsync` API so Settings stays editable;
+    falls back to device-wide `PersonalizationCSP` keys, which re-grey the UI
+  - Disables Windows Spotlight first, since it overrides any fixed image
+  - Self-elevates. Requires Administrator
+
 ### Config Files (`files/`)
 
 - **files/notepad++/shortcuts.xml**: Downloaded during setup by `DownloadConfigFiles()` to `%AppData%\Notepad++\`
