@@ -79,20 +79,30 @@ selected, the prompt asks for that value and stores it in a `settings` block in
 `neutmute-boxstarter.json` (alongside `concerns`), so later runs stay
 unattended. `renameHost` is the only user of this today (`hostName`).
 
+A concern definition may also carry `DependsOn` (a concern key) or
+`Precondition` (a scriptblock) plus `SkipNote`. When either is unsatisfied the
+prompt is not asked at all — the concern is set to `$false` and a `[not asked
+- reason]` line is printed. Definitions are ordered so a `DependsOn` target is
+always answered before its dependents.
+
+These only suppress the *question*. A saved config or an explicit `--target`
+can still reach the work, so a concern with a `Precondition` should re-check it
+in its own function (as `ConfigureDdrive()` does).
+
 Available concerns:
 
 - **core**: Essential utilities for all machines (browsers, Notepad++, 7zip, etc.)
 - **baseSettings**: Windows Explorer/taskbar tweaks, power options, execution policy
 - **autoLogon**: Unhides the netplwiz password checkbox so automatic logon can be configured
 - **regionalSettings**: Australian timezone and date/time formats
-- **ddrive**: D: drive setup and Windows known-folder relocation
+- **ddrive**: D: drive setup and Windows known-folder relocation — not asked when the machine has no D: drive
 - **home**: Home-specific apps (Spotify, Joplin, Calibre, etc.) plus Remote Desktop
 - **htpc**: Media center apps (Kodi, Steam)
 - **dev**: Developer tools (Git, VS Code, SSMS, Slack, etc.)
-- **iis**: IIS Windows features and URL Rewrite (independent of dev)
-- **visualStudio**: Visual Studio 2026 Community
+- **iis**: IIS Windows features and URL Rewrite — not asked unless `dev` was accepted
+- **visualStudio**: Visual Studio 2026 Community — not asked unless `dev` was accepted
 - **renameHost**: Renames the computer; prompts once for the name and saves it, no reboot triggered
-- **win11Tweaks**: Classic context menu, block "Edit in Notepad", remove OneDrive
+- **win11Tweaks**: Classic context menu, block "Edit in Notepad", remove OneDrive, disable Bing search and Game Bar tips
 - **chrisTitus**: Chris Titus Tech Windows Utility (interactive GUI, blocks unattended runs)
 
 ## Application Organization
@@ -122,7 +132,8 @@ All Chocolatey installs go through `Install-ChocoPackage`, which skips packages 
 - **Install-ChocoPackage($packageName) / Install-ChocoPackages($packageArray)**: Idempotent Chocolatey installer; skips packages already present in `$ChocolateyInstall\lib`
 - **InstallVisualStudio()**: VS 2026 Community install — gated by the `visualStudio` concern
 - **InstallInternetInformationServices()**: Extensive IIS feature installation — gated by the `iis` concern
-- **ConfigureDdrive()**: D: drive setup and Windows folder relocation
+- **ConfigureDdrive()**: D: drive setup and Windows folder relocation; re-checks `Test-DataDrive` and skips if D: is absent
+- **Test-DataDrive()**: True when a D: drive exists and is not a CD-ROM (DriveType 5)
 - **SetRegionalSettings()**: Hardcoded to Australia timezone and date formats
 - **Write-Wrapped($text, $firstPrefix, $contPrefix)**: Word-wraps prompt descriptions and package lists to the console width
 - **Set-AutoLogonPolicy()**: Sets `DevicePasswordLessBuildVersion` — gated by the `autoLogon` concern

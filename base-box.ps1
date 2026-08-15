@@ -138,13 +138,15 @@ $script:ConcernDefinitions = @(
        Prompt      = 'Apply regional settings (Australia)'
        Description = 'Sets the timezone to AUS Eastern Standard Time, short date to dd-MMM-yy, short time to HH:mm, long time to HH:mm:ss, country to Australia and language to ENA.' },
 
-    @{ Key         = 'ddrive'
-       Prompt      = 'Configure D: drive and relocate folders'
-       Description = 'Labels D: as "Data" and relocates the Windows known folders: Documents, Pictures and Desktop to D:\Data\User, Videos and Music to D:\Media, Downloads to D:\Downloads.' },
+    @{ Key          = 'ddrive'
+       Prompt       = 'Configure D: drive and relocate folders'
+       Description  = 'Labels D: as "Data" and relocates the Windows known folders: Documents, Pictures and Desktop to D:\Data\User, Videos and Music to D:\Media, Downloads to D:\Downloads.'
+       Precondition = { Test-DataDrive }
+       SkipNote     = 'this machine has no D: drive' },
 
     @{ Key         = 'home'
        Prompt      = 'Install Home apps'
-       Description = 'Enables Remote Desktop, disables Bing search and Game Bar tips, then installs backup, music, ebook and messaging apps.'
+       Description = 'Enables Remote Desktop, then installs backup, music, ebook and messaging apps.'
        Packages    = $homeApps },
 
     @{ Key         = 'htpc'
@@ -159,11 +161,13 @@ $script:ConcernDefinitions = @(
 
     @{ Key         = 'iis'
        Prompt      = 'Install IIS'
-       Description = 'Enables the IIS Windows features (web server, ASP.NET, WebSockets, logging, management console, Windows/Basic/Digest authentication) plus Windows Identity Foundation and the Linux subsystem, then installs the URL Rewrite module.' },
+       Description = 'Enables the IIS Windows features (web server, ASP.NET, WebSockets, logging, management console, Windows/Basic/Digest authentication) plus Windows Identity Foundation and the Linux subsystem, then installs the URL Rewrite module.'
+       DependsOn   = 'dev' },
 
     @{ Key         = 'visualStudio'
        Prompt      = 'Install Visual Studio 2026 Community'
-       Description = 'Installs Visual Studio 2026 Community with all workloads and recommended components. Large download; runs last so a failure does not take the rest of the run with it.' },
+       Description = 'Installs Visual Studio 2026 Community with all workloads and recommended components. Large download; runs last so a failure does not take the rest of the run with it.'
+       DependsOn   = 'dev' },
 
     @{ Key         = 'renameHost'
        Prompt      = 'Rename this computer'
@@ -173,7 +177,7 @@ $script:ConcernDefinitions = @(
 
     @{ Key         = 'win11Tweaks'
        Prompt      = 'Apply Windows 11 tweaks'
-       Description = 'Restores the classic right-click context menu, blocks the "Edit in Notepad" shell extension, and uninstalls OneDrive via winget.' },
+       Description = 'Restores the classic right-click context menu, blocks the "Edit in Notepad" shell extension, uninstalls OneDrive via winget, and disables Bing search in Start and Game Bar tips.' },
 
     @{ Key         = 'chrisTitus'
        Prompt      = 'Run the Chris Titus Windows Utility'
@@ -183,6 +187,13 @@ $script:ConcernDefinitions = @(
 # ---------------------------------------------------------------------------
 # Command line
 # ---------------------------------------------------------------------------
+
+function Test-DataDrive()
+{
+    # A real D: drive, not a CD-ROM (DriveType 5) and not absent
+    $drive = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='D:'" -ErrorAction SilentlyContinue
+    return [bool]($drive -and $drive.DriveType -ne 5)
+}
 
 function Install-Boxstarter()
 {
@@ -468,6 +479,23 @@ function Get-Concerns()
     # First run (no saved config): prompt interactively, default No.
     $concerns = @{}
     foreach ($def in $script:ConcernDefinitions) {
+
+        # Don't ask questions whose answer cannot matter. Definitions are
+        # ordered so a DependsOn concern is always answered before its dependents.
+        if ($def.DependsOn -and -not $concerns[$def.DependsOn]) {
+            Write-Host ""
+            Write-Host "$($def.Prompt)? [not asked - $($def.DependsOn) was declined]"
+            $concerns[$def.Key] = $false
+            continue
+        }
+
+        if ($def.Precondition -and -not (& $def.Precondition)) {
+            Write-Host ""
+            Write-Host "$($def.Prompt)? [not asked - $($def.SkipNote)]"
+            $concerns[$def.Key] = $false
+            continue
+        }
+
         Write-Host ""
         Write-Host "$($def.Prompt)?"
         if ($def.Description) { Write-Wrapped $def.Description }
@@ -696,6 +724,13 @@ function ConfigureDdrive()
 {
     Write-BoxstarterMessage "Configuring D:\"
 
+    # A saved config or an explicit target can reach here on a machine that has
+    # no D:, so re-check rather than relocating folders onto a missing drive
+    if (-not (Test-DataDrive)) {
+        Write-Warning "  No D: drive on this machine, skipping"
+        return
+    }
+
     Set-Volume -DriveLetter "D" -NewFileSystemLabel "Data"
 
     $userDataPath = "D:\Data\User"
@@ -723,6 +758,9 @@ function Invoke-Win11Tweaks()
 
     # Remove OneDrive
     winget uninstall Microsoft.OneDrive --silent --disable-interactivity --accept-source-agreements
+
+    Disable-BingSearch
+    Disable-GameBarTips
 }
 
 function Rename-Host()
@@ -823,8 +861,6 @@ if ($concerns['ddrive']) { ConfigureDdrive }
 if ($concerns['home']) {
     Write-Host "--- [Home Apps] ---"
     Enable-RemoteDesktop
-    Disable-BingSearch
-    Disable-GameBarTips
     Install-ChocoPackages $homeApps
 }
 
