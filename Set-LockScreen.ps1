@@ -320,7 +320,11 @@ function Copy-ToWorkingDir {
     $dest = Join-Path $ImageDir ('lockscreen' + [System.IO.Path]::GetExtension($Source))
     Get-ChildItem $ImageDir -Filter 'lockscreen.*' -ErrorAction SilentlyContinue |
         Where-Object { $_.FullName -ne $dest } | Remove-Item -Force -ErrorAction SilentlyContinue
-    Copy-Item -LiteralPath $Source -Destination $dest -Force
+    # -Persist re-runs with -ImagePath pointed at this same staged copy - skip the
+    # self-copy rather than let Copy-Item throw "Cannot overwrite the item with itself".
+    if ((Resolve-Path -LiteralPath $Source).Path -ne $dest) {
+        Copy-Item -LiteralPath $Source -Destination $dest -Force
+    }
 
     # Everyone needs read access - the lock screen is rendered before sign-in.
     $acl = Get-Acl $dest
@@ -498,7 +502,16 @@ switch ($PSCmdlet.ParameterSetName) {
 
         Write-Good "Lock screen applied via $applied"
 
-        if ($Persist) { Register-PersistTask -ScriptPath $PSCommandPath -Arguments @("-Mode $Mode") }
+        if ($Persist) {
+            # Re-run args must reproduce this exact configuration - a bare "-Mode Image" with no
+            # -ImagePath throws "Image not found: " on every subsequent logon and aborts after
+            # Remove-Restrictions has already run, which is why the policy looked "reapplied".
+            $persistArgs = @("-Mode $Mode")
+            if ($Mode -eq 'Image') { $persistArgs += "-ImagePath `"$target`"" }
+            if ($Mode -eq 'Blank')  { $persistArgs += "-BlankColor $BlankColor" }
+            if ($Method -ne 'Auto') { $persistArgs += "-Method $Method" }
+            Register-PersistTask -ScriptPath $PSCommandPath -Arguments $persistArgs
+        }
 
         Write-Head 'Done.'
         Write-Host '  Press Win+L to check. If the old image persists, sign out and back in'
